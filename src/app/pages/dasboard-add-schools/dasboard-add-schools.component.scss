@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f9ff;
+  box-sizing: border-box;
+}
+
+.dashboard-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  /* Force la Sidebar à occuper exactement 250px */
+  .layout-sidebar {
+    display: block;
+    width: 250px;
+    min-width: 250px; /* Sécurité pour éviter qu'elle ne se réduise */
+    max-width: 250px;
+    box-sizing: border-box;
+  }
+
+  /* Le contenu prend tout le reste de la largeur avec la marge et l'effet d'ombre interne */
+  .layout-content {
+    display: block;
+    flex: 1; /* Occupe tout l'espace restant à droite */
+    padding: 10px;
+    box-sizing: border-box;
+    
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.04), 
+                inset -4px -4px 10px rgba(0, 0, 0, 0.04);
+    
+    /* Optionnel : Assure un défilement propre du contenu si la page est longue */
+    overflow-y: auto; 
+    height: 100vh;
+  }
+}

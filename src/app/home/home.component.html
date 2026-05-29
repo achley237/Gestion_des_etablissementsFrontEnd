@@ -1,0 +1,303 @@
+<nav class="sge-navbar">
+  <div class="sge-nav-inner">
+
+    <a routerLink="/" class="sge-brand">
+  <img 
+    src="design/campus237logo.jpeg" 
+    alt="" 
+    class="sge-brand-logo"
+  />
+  <span class="sge-brand-name">CAMPUS<strong>237</strong></span>
+</a>
+
+    <ul class="sge-nav-links" [class.open]="mobileMenuOpen">
+      <li><a routerLink="/etablissements" class="sge-nav-link">Annuaire</a></li>
+      <li><a routerLink="/carte"          class="sge-nav-link">Carte</a></li>
+      <li><a routerLink="/actualites"     class="sge-nav-link">Actualités</a></li>
+      <li><a routerLink="/a-propos"       class="sge-nav-link">À propos</a></li>
+    </ul>
+
+    <div class="sge-nav-actions">
+      <a href="../auth"    class="sge-btn-outline">Connexion</a>
+      <a href="register" class="sge-btn-filled">Inscription</a>
+      <button class="sge-hamburger" (click)="toggleMenu()" [class.open]="mobileMenuOpen" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+</nav>
+
+
+<!-- ── HERO ── -->
+<section class="sge-hero">
+  <!-- Formes décoratives arrière-plan -->
+  <div class="sge-hero-orb sge-orb-1"></div>
+  <div class="sge-hero-orb sge-orb-2"></div>
+  <div class="sge-hero-orb sge-orb-3"></div>
+
+  <div class="sge-hero-body">
+    <span class="sge-hero-badge"> Annuaire National des Établissements</span>
+
+    <h1 class="sge-hero-title">
+      Trouvez l'établissement<br>
+      <span class="sge-hero-accent">qui vous correspond</span>
+    </h1>
+
+    <p class="sge-hero-sub">
+      Accédez au répertoire complet des établissements scolaires, consultez leurs profils,
+      comparez et prenez les meilleures décisions pour votre avenir.
+    </p>
+
+    <!-- Carte de recherche -->
+    <div class="sge-search-card">
+      <div class="sge-search-row">
+
+        <div class="sge-field">
+          <label class="sge-field-label">LOCALISATION</label>
+          <div class="sge-field-wrap">
+            <span class="sge-field-ico"></span>
+            <input type="text"
+                   [(ngModel)]="searchLocation"
+                   placeholder="Ville ou région…"
+                   class="sge-field-ctrl" />
+          </div>
+        </div>
+
+        <div class="sge-field">
+          <label class="sge-field-label">NIVEAU</label>
+          <div class="sge-field-wrap">
+            <span class="sge-field-ico"></span>
+            <select [(ngModel)]="searchNiveau" class="sge-field-ctrl sge-select">
+              <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+            </select>
+            <span class="sge-select-arrow"></span>
+          </div>
+        </div>
+
+        <div class="sge-field">
+          <label class="sge-field-label">TYPE</label>
+          <div class="sge-field-wrap">
+            <span class="sge-field-ico"></span>
+            <select [(ngModel)]="searchType" class="sge-field-ctrl sge-select">
+              <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+            </select>
+            <span class="sge-select-arrow"></span>
+          </div>
+        </div>
+
+        <button class="sge-btn-search" (click)="onSearch()">
+          &nbsp; Rechercher
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de stats flottante -->
+  <div class="sge-stats-bar">
+    <div class="sge-stat" *ngFor="let s of stats">
+      <span class="sge-stat-ico">{{ s.icone }}</span>
+      <span class="sge-stat-val">{{ s.valeur }}</span>
+      <span class="sge-stat-lbl">{{ s.label }}</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── ÉTABLISSEMENTS EN VEDETTE ── -->
+<section class="sge-section">
+  <div class="sge-section-head">
+    <div>
+      <span class="sge-tag"> Recommandés</span>
+      <h2 class="sge-section-title">Établissements en vedette</h2>
+      <p class="sge-section-sub">Les mieux notés dans votre région</p>
+    </div>
+    <a routerLink="/etablissements" class="sge-view-all">Voir tout -></a>
+  </div>
+
+  <div class="sge-cards-grid">
+    <div class="sge-etab-card" *ngFor="let e of etablissements">
+      <div class="sge-card-img-wrap">
+        <img [src]="e.image" [alt]="e.nom" class="sge-card-img" loading="lazy" />
+        <span class="sge-card-note"> {{ e.note }}</span>
+        <span class="sge-card-type" [style.background]="e.couleur">{{ e.type }}</span>
+      </div>
+      <div class="sge-card-body">
+        <h3 class="sge-card-title">{{ e.nom }}</h3>
+        <p class="sge-card-loc">{{ e.ville }}, {{ e.pays }}</p>
+        <div class="sge-card-foot">
+          <span class="sge-card-tag">{{ e.tag }}</span>
+          <button class="sge-card-save" title="Sauvegarder"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── CATÉGORIES ── -->
+<section class="sge-section sge-bg-soft">
+  <div class="sge-section-head">
+    <div>
+      <span class="sge-tag"> Explorer</span>
+      <h2 class="sge-section-title">Parcourir par spécialité</h2>
+      <p class="sge-section-sub">Trouvez selon vos domaines d'intérêt</p>
+    </div>
+  </div>
+
+  <div class="sge-cat-grid">
+    <a class="sge-cat-card"
+       *ngFor="let c of categories"
+       [style.background]="c.couleur"
+       routerLink="/etablissements"
+       [queryParams]="{ categorie: c.nom }">
+      <span class="sge-cat-ico">{{ c.icone }}</span>
+      <span class="sge-cat-name">{{ c.nom }}</span>
+      <span class="sge-cat-count">{{ c.count }} établissements</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- ── ESPACES PAR RÔLE ── -->
+<section class="sge-roles-section">
+  <div class="sge-roles-orb"></div>
+  <div class="sge-section sge-section-dark">
+
+    <div class="sge-section-head centered">
+      <span class="sge-tag light">Accès</span>
+      <h2 class="sge-section-title light">Un espace pour chaque acteur</h2>
+      <p class="sge-section-sub light">Le CAMPU237 s'adapte à votre rôle dans l'écosystème éducatif</p>
+    </div>
+
+    <div class="sge-roles-grid">
+
+      <!-- Visiteur -->
+      <div class="sge-role-card">
+        <div class="sge-role-ico"></div>
+        <h3 class="sge-role-title">Visiteur</h3>
+        <p class="sge-role-desc">Recherchez et consultez librement tous les établissements, comparez et lisez les avis.</p>
+        <ul class="sge-role-list">
+          <li>✓ Accès à l'annuaire complet</li>
+          <li>✓ Moteur de recherche avancé</li>
+          <li>✓ Consultation des profils</li>
+          <li>✓ Carte interactive</li>
+        </ul>
+        <a routerLink="/etablissements" class="sge-role-btn">Explorer →</a>
+      </div>
+
+      <!-- Directeur (mis en avant) -->
+      <div class="sge-role-card sge-role-featured">
+        <div class="sge-role-badge">Le plus utilisé</div>
+        <div class="sge-role-ico"></div>
+        <h3 class="sge-role-title">Directeur</h3>
+        <p class="sge-role-desc">Gérez la fiche de votre établissement, publiez vos actualités et suivez vos statistiques.</p>
+        <ul class="sge-role-list">
+          <li>✓ Tableau de bord dédié</li>
+          <li>✓ Mise à jour des informations</li>
+          <li>✓ Gestion des avis reçus</li>
+          <li>✓ Statistiques de visibilité</li>
+        </ul>
+        <a routerLink="/register" [queryParams]="{role:'directeur'}" class="sge-role-btn gold">Espace Directeur →</a>
+      </div>
+
+      <!-- Administrateur -->
+      <div class="sge-role-card">
+        <div class="sge-role-ico"></div>
+        <h3 class="sge-role-title">Administrateur</h3>
+        <p class="sge-role-desc">Contrôle total sur la base de données, les comptes utilisateurs et la modération.</p>
+        <ul class="sge-role-list">
+          <li>✓ CRUD complet</li>
+          <li>✓ Gestion des utilisateurs</li>
+          <li>✓ Modération des contenus</li>
+          <li>✓ Rapports & exports</li>
+        </ul>
+        <a routerLink="/login" [queryParams]="{role:'admin'}" class="sge-role-btn">Accès Admin →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ── TÉMOIGNAGES ── -->
+<section class="sge-section sge-testi-section">
+  <div class="sge-section-head centered">
+    <span class="sge-tag"> Témoignages</span>
+    <h2 class="sge-section-title">Ce qu'ils disent du SGE</h2>
+  </div>
+
+  <div class="sge-testi-track">
+    <div class="sge-testi-card"
+         *ngFor="let t of temoignages; let i = index"
+         [class.active]="i === activeTestimonial">
+      <p class="sge-testi-text">"{{ t.texte }}"</p>
+      <div class="sge-testi-author">
+        <div class="sge-avatar">{{ t.avatar }}</div>
+        <div>
+          <strong>{{ t.auteur }}</strong>
+          <span>{{ t.role }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sge-dots">
+    <button class="sge-dot"
+            *ngFor="let t of temoignages; let i = index"
+            [class.active]="i === activeTestimonial"
+            (click)="setTestimonial(i)">
+    </button>
+  </div>
+</section>
+
+
+<!-- ── CTA ── -->
+<section class="sge-cta">
+  <div class="sge-cta-inner">
+    <h2>Prêt à rejoindre le réseau national ?</h2>
+    <p>Inscrivez votre établissement dès aujourd'hui et gagnez en visibilité</p>
+    <div class="sge-cta-btns">
+      <a routerLink="/register" class="sge-cta-primary">Inscrire mon établissement</a>
+      <a routerLink="/etablissements" class="sge-cta-ghost">Parcourir l'annuaire</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── FOOTER ── -->
+<footer class="sge-footer">
+  <div class="sge-footer-grid">
+    <div class="sge-footer-brand">
+      <div class="sge-brand">
+        <span class="sge-brand-icon"></span>
+        <span class="sge-brand-name">CAMPUS<strong>237</strong></span>
+      </div>
+      <p>Le système national de gestion et de consultation des établissements scolaires.</p>
+    </div>
+    <div class="sge-footer-col">
+      <h4>Navigation</h4>
+      <a routerLink="/etablissements">Annuaire</a>
+      <a routerLink="/carte">Carte</a>
+      <a routerLink="/actualites">Actualités</a>
+      <a routerLink="/a-propos">À propos</a>
+    </div>
+    <div class="sge-footer-col">
+      <h4>Espace utilisateur</h4>
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/register">Inscription</a>
+      <a routerLink="/dashboard">Tableau de bord</a>
+    </div>
+    <div class="sge-footer-col">
+      <h4>Contact</h4>
+      <span> contact&#64;CAMPU237.cm</span>
+      <span> +237 658 60 46 68</span>
+      <span>Yaoundé, Cameroun</span>
+    </div>
+  </div>
+  <div class="sge-footer-bottom">
+    <span>© 2025 EduSGE — Tous droits réservés</span>
+    <span>Mentions légales · Confidentialité</span>
+  </div>
+</footer>

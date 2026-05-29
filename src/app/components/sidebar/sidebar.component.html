@@ -1,0 +1,38 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="brand-icon">
+            <span><img src="design/campus237logo.jpeg" alt="Logo"></span>
+        </div>
+        <div class="brand-details">
+            <p class="brand-name">Central Office</p>
+            <p class="brand-sub">{{ userRole }}</p>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        @for (item of menus; track item.label) {
+        @if (item.visible) {
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-item">
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+        </a>
+        }
+        }
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar">{{ userInitials }}</div>
+            <div class="user-details">
+                <p class="user-name" [title]="userName">{{ userName }}</p>
+                <p class="user-role">{{ userRole }}</p>
+            </div>
+        </div>
+
+        <button class="logout-btn" (click)="onLogout()">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="logout-label">Déconnexion</span>
+        </button>
+    </div>
+</aside>

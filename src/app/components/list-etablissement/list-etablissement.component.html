@@ -1,0 +1,95 @@
+<div class="list-container">
+  <div class="header-section">
+    <h2 class="page-title">Registre des Établissements</h2>
+    <p class="page-subtitle">Consultez et gérez les structures d'enseignement enregistrées sur Campus237.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="banner error-banner">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="banner success-banner">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <div class="glass-table-card">
+    @if (isLoading()) {
+      <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Récupération des données réseau...</p>
+      </div>
+    } @else if (establishments().length === 0) {
+      <div class="empty-box">
+        <span class="material-symbols-outlined">school</span>
+        <p>Aucun établissement répertorié pour le moment.</p>
+      </div>
+    } @else {
+      <div class="responsive-wrapper">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Établissement</th>
+              <th>Type</th>
+              <th>Localisation</th>
+              <th>Contact</th>
+              <th>Statut</th>
+              @if (userRole() === 'admin' || userRole() === 'administrateur') {
+                <th class="text-center">Modération Admin</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (school of establishments(); track school.id) {
+              <tr>
+                <td>
+                  <div class="title-cell">
+                    <span class="main-name">{{ school.nom }}</span>
+                    <span class="sub-info">Création : {{ school.annee_creation || 'Inconnue' }}</span>
+                  </div>
+                </td>
+                <td><span class="type-badge">{{ school.type }}</span></td>
+                <td>{{ school.ville }} ({{ school.pays }})</td>
+                <td>
+                  <div class="contact-info">
+                    <span>{{ school.email || 'Aucun email' }}</span>
+                    <span class="sub-info">{{ school.telephone || 'Aucun contact' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [ngClass]="getStatusClass(school.statut)">
+                    {{ school.statut === 'en_attente' ? 'En attente' : school.statut }}
+                  </span>
+                  @if (school.statut === 'rejete' && school.motif_rejet) {
+                    <p class="reject-reason" [title]="school.motif_rejet">Motif: {{ school.motif_rejet }}</p>
+                  }
+                </td>
+                
+                @if (userRole() === 'admin' || userRole() === 'administrateur') {
+                  <td>
+                    <div class="buttons-wrapper">
+                      @if (school.statut === 'en_attente') {
+                        <button class="action-btn approve" (click)="onApprove(school)">
+                          <span class="material-symbols-outlined">done</span> Approuver
+                        </button>
+                        <button class="action-btn reject" (click)="onReject(school)">
+                          <span class="material-symbols-outlined">close</span> Rejeter
+                        </button>
+                      } @else {
+                        <span class="archived-text">Aucune action requise</span>
+                      }
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="register-layout">
+  <div class="glow-bg">
+    <div class="blob blob-top"></div>
+    <div class="blob blob-bottom"></div>
+  </div>
+
+  <main class="register-container">
+    <div class="brand-side">
+      <div class="brand-logo-row">
+        <div class="logo-box">
+          <span class="material-symbols-outlined"><img src="design/campus237logo.jpeg" alt=""></span>
+        </div>
+        <h1 class="brand-title">Campus237</h1>
+      </div>
+      
+      <div class="brand-message">
+        <h2 class="hero-headline">L'excellence académique commence par une gestion simplifiée.</h2>
+        <p class="hero-subtext">
+          Rejoignez la plateforme et transformez la gestion administrative de votre établissement.
+        </p>
+      </div>
+
+      <div class="hero-preview-frame">
+        <img alt="Campus Universitaire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG404Q7kEax3IZ3z_8Eo1dbVIV62rU7tT-LXsL0shqixevoeudlYgZxV4dU1_EWKw9LghEpQb0rTrdCUNr3GaH9AsiDlzM5hVMDTzjdUAlouoRhf981bQQQaZZ3lKLeDMmP375ncC5kuEanWkBdYgVcjKeMfB_WNxpxsdUCjXkdk0nnErCN1N8wGA6mEmo7m4QZokiYSGXMje9dwVrehxwsEXdNScJJjB6E26H-DX1AZJYfW63AwLjAsS2WdJyizmAHNoUL3UGJV0"/>
+        <div class="gradient-overlay"></div>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="form-glass-card">
+        
+        <div class="mobile-logo-header">
+          <span class="material-symbols-outlined">school</span>
+          <span class="mobile-brand-name">Campus237</span>
+        </div>
+
+        <div class="form-intro">
+          <h2 class="section-title">Créer un compte</h2>
+          <p class="section-subtitle">Remplissez les informations ci-dessous.</p>
+        </div>
+
+        @if (errorMessage()) {
+           <div class="error-banner">
+             <span class="material-symbols-outlined">error</span>
+             <p>{{ errorMessage() }}</p>
+           </div>
+         }
+
+        <form class="register-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          
+          <div class="form-row-twin">
+            <div class="form-group">
+              <label for="nom">Nom</label>
+              <input type="text" id="nom" formControlName="nom" placeholder="Ex: Dupont" />
+            </div>
+            <div class="form-group">
+              <label for="prenom">Prénom</label>
+              <input type="text" id="prenom" formControlName="prenom" placeholder="Ex: Jean" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Adresse Email</label>
+            <div class="input-icon-wrapper">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input type="email" id="email" formControlName="email" placeholder="nom@etablissement.com" />
+            </div>
+          </div>
+
+          <div class="form-row-twin">
+            <div class="form-group">
+              <label for="password">Mot de passe</label>
+              <div class="input-icon-wrapper">
+                <span class="material-symbols-outlined input-icon">lock</span>
+                <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••" />
+                <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility()">
+                  <span class="material-symbols-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password_confirm">Confirmation</label>
+              <div class="input-icon-wrapper">
+                <span class="material-symbols-outlined input-icon">lock_clock</span>
+                <input [type]="showPassword() ? 'text' : 'password'" id="password_confirm" formControlName="password_confirm" placeholder="••••••••" />
+              </div>
+            </div>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="checkbox-container">
+              <input type="checkbox" id="proposeEtablissement" formControlName="proposeEtablissement" />
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Je propose des établissements pour la gestion centralisée.</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="submit-btn" [disabled]="isLoading()">
+              @if (isLoading()) {
+                <span class="spinner"></span>
+              } @else {
+                S'inscrire
+                <span class="material-symbols-outlined">arrow_forward</span>
+              }
+            </button>
+
+            <div class="divider-row">
+              <div class="line"></div>
+              <span class="divider-text">OU</span>
+              <div class="line"></div>
+            </div>
+
+            <p class="login-redirect-text">
+              Déjà un compte ? 
+              <button type="button" class="login-link-btn" (click)="goToLogin()">Se connecter</button>
+            </p>
+          </div>
+        </form>
+
+        <footer class="legal-footer">
+          <a href="#" (click)="$event.preventDefault()">Conditions</a>
+          <a href="#" (click)="$event.preventDefault()">Confidentialité</a>
+        </footer>
+
+      </div>
+    </div>
+  </main>
+</div>

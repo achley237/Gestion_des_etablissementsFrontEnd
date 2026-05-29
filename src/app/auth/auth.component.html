@@ -1,0 +1,177 @@
+<div class="auth-root">
+
+  <!-- ══════════════════════════════════════════════════════════
+       LEFT PANEL — Branding (Masqué sur mobile, visible sur desktop)
+  ══════════════════════════════════════════════════════════ -->
+  <section class="auth-left">
+    <div class="auth-left__pattern"></div>
+    <div class="auth-left__blob"></div>
+
+    <!-- Logo -->
+    <div class="auth-left__logo">
+      <div class="auth-left__logo-row">
+        <img class="auth-left__logo-icon" src="design/campus237logo.jpeg" alt="">
+        <h1 class="auth-left__logo-name">Campus237</h1>
+      </div>
+      <p class="auth-left__tagline">L'excellence académique à travers une gestion simplifiée.</p>
+    </div>
+
+    <!-- Quote -->
+    <div class="auth-left__quote">
+      <blockquote>
+        "Une interface conçue pour les leaders de l'éducation qui exigent précision et efficacité au quotidien."
+      </blockquote>
+      <div class="auth-left__quote-meta">
+        <div class="auth-left__quote-line"></div>
+        <p class="auth-left__quote-label">Système de Gestion Établissement</p>
+      </div>
+    </div>
+
+    <!-- Hero image -->
+    <div class="auth-left__image-wrap">
+      <img
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN1TZSze65cb_VvmwFZRrliwzVxe2CZWv1-l4ODgMXXlD8TBxyOw417ay-RlgCYoJDmUiJF8fw34He_994yZTalKq04b1UIyGCtDySTaXnoUFjg8GTpoughrVbaj8mRHl86pbFi4qZjOO042KNAH5CAtQtVcyu5qE3xJa3h4h3roFqiV0RWy9mzqW9c3hmC4FroOu8XeXmY7O-oUPVJCQ6m5zCZAF-WIdS6YNJ-XEkotFOJr-f7h9Xo-XNYcHjQdxSZ55zmMhpWy0"
+        alt="Bibliothèque universitaire moderne"
+      />
+      <div class="auth-left__image-overlay"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       RIGHT PANEL — Form (Parfaitement centré)
+  ══════════════════════════════════════════════════════════ -->
+  <main class="auth-right">
+
+    <!-- Mobile logo -->
+    <div class="auth-right__mobile-logo">
+      <div class="auth-right__mobile-logo-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5.49 12.38l6.51 3.55 6.51-3.55V17c0 .41-.21.79-.56 1l-5.95 3.25a1.002 1.002 0 01-.98 0l-5.95-3.25a1.11 1.11 0 01-.58-1v-4.62z"/>
+        </svg>
+      </div>
+      <span class="auth-right__mobile-logo-name">Campus237</span>
+    </div>
+
+    <div class="auth-card">
+
+      <!-- Heading -->
+      <div class="auth-card__heading">
+        <h2 class="auth-card__title">Bienvenue</h2>
+        <p class="auth-card__subtitle">Veuillez vous connecter pour accéder à votre portail.</p>
+      </div>
+
+      <!-- Toast -->
+      <div
+        *ngIf="toastMessage"
+        [class]="'toast ' + (toastIsError ? 'toast--error' : 'toast--success')"
+        role="alert"
+      >
+        <div class="toast-icon-wrap">
+          <span class="toast-dot"></span>
+        </div>
+        {{ toastMessage }}
+      </div>
+
+      <!-- Login form -->
+      <form class="auth-form" (ngSubmit)="onLogin()" #loginForm="ngForm">
+
+        <!-- Email -->
+        <div class="form-field">
+          <label class="form-field__label" for="email">Adresse e-mail</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              [(ngModel)]="loginEmail"
+              (blur)="validateEmail()"
+              placeholder="nom@etablissement.fr"
+              [class.has-error]="emailError"
+            />
+          </div>
+          <span *ngIf="emailError" class="field-error">{{ emailError }}</span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-field">
+          <div class="form-field__label-row">
+            <label class="form-field__label" for="password">Mot de passe</label>
+            <button type="button" class="form-field__forgot" (click)="forgotPassword()">
+              Oublié ?
+            </button>
+          </div>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input
+              id="password"
+              name="password"
+              [type]="showPassword ? 'text' : 'password'"
+              required
+              [(ngModel)]="loginPassword"
+              (blur)="validatePassword()"
+              placeholder="••••••••"
+              [class.has-error]="passwordError"
+            />
+            <button type="button" class="toggle-password" (click)="togglePassword()">
+              <svg *ngIf="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <span *ngIf="passwordError" class="field-error">{{ passwordError }}</span>
+        </div>
+
+        <!-- Remember me -->
+        <div class="remember-row">
+          <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            [(ngModel)]="rememberMe"
+          />
+          <label for="remember">Se souvenir de moi</label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <div *ngIf="isLoading" class="spinner"></div>
+          <span *ngIf="isLoading">Authentification…</span>
+          <span *ngIf="!isLoading">Se connecter</span>
+          <svg *ngIf="!isLoading" class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <p class="auth-footer">
+        Vous n'avez pas encore de compte ?
+        <a href="register">S'inscrire</a>
+      </p>
+
+    </div>
+
+    <!-- Decorative corner design elements -->
+    <div class="auth-right__deco">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L1 7l11 5 9-4.09V14c0 .41-.21.79-.56 1l-5.95 3.25a1.002 1.002 0 01-.98 0L6.5 15v-2h-2v3.5c0 .41.21.79.56 1l5.95 3.25c.16.08.33.12.49.12s.33-.04.49-.12l5.95-3.25c.35-.19.56-.57.56-1v-5.41L23 7l-11-5z"/>
+      </svg>
+    </div>
+
+  </main>
+</div>
