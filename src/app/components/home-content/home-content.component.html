@@ -1,650 +1,371 @@
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campus237 – Accueil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <style>
-        /* ── Reset & Base ──────────────────────────────── */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9ff;
-            color: #0d1c2e;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* ── Page layout ────────────────────────────────── */
-        .page-wrapper {
-            max-width: 940px;
-            margin: 0 auto;
-            padding: 28px 20px 64px;
-        }
-
-        /* ── Hero ───────────────────────────────────────── */
-        .hero {
-            background: linear-gradient(135deg, #00236f 0%, #1e3a8a 100%);
-            border-radius: 20px;
-            padding: 48px 44px 44px;
-            margin-bottom: 28px;
-        }
-
-        .hero__title {
-            font-size: 42px;
-            font-weight: 800;
-            color: #ffffff;
-            line-height: 1.15;
-            margin-bottom: 16px;
-            max-width: 500px;
-        }
-
-        .hero__subtitle {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.75);
-            line-height: 1.65;
-            max-width: 580px;
-            margin-bottom: 32px;
-        }
-
-        /* Search bar */
-        .hero__search {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 6px 6px 6px 0;
-            gap: 0;
-            max-width: 720px;
-        }
-
-        .search-field {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            padding: 10px 18px;
-            border-right: 1px solid #c5c5d3;
-        }
-
-        .search-field:last-of-type {
-            border-right: none;
-        }
-
-        .search-field .material-symbols-outlined {
-            font-size: 20px;
-            color: #444651;
-            flex-shrink: 0;
-        }
-
-        .search-field input {
-            border: none;
-            outline: none;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            color: #0d1c2e;
-            background: transparent;
-            width: 100%;
-        }
-
-        .search-field input::placeholder {
-            color: #757682;
-        }
-
-        .search-btn {
-            background-color: #00236f;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 14px 30px;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background-color 0.2s;
-            margin-right: 2px;
-        }
-
-        .search-btn:hover {
-            background-color: #001a55;
-        }
-
-        /* ── Stats ──────────────────────────────────────── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 44px;
-        }
-
-        .stat-card {
-            background: #ffffff;
-            border: 1px solid #c5c5d3;
-            border-radius: 16px;
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .stat-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .stat-icon .material-symbols-outlined {
-            font-size: 26px;
-        }
-
-        .stat-icon--blue {
-            background-color: #dce1ff;
-            color: #00236f;
-        }
-
-        .stat-icon--yellow {
-            background-color: #fed65b;
-            color: #735c00;
-        }
-
-        .stat-icon--teal {
-            background-color: #eff4ff;
-            color: #00236f;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #444651;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: 800;
-            color: #0d1c2e;
-            line-height: 1;
-        }
-
-        /* ── Section header ─────────────────────────────── */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 6px;
-        }
-
-        .section-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: #00236f;
-        }
-
-        .see-all {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            color: #444651;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .see-all .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        .see-all:hover {
-            color: #00236f;
-        }
-
-        .section-sub {
-            font-size: 14px;
-            color: #444651;
-            margin-bottom: 20px;
-        }
-
-        /* ── School Cards ───────────────────────────────── */
-        .schools-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 48px;
-        }
-
-        .school-card {
-            background: #ffffff;
-            border: 1px solid #c5c5d3;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: box-shadow 0.2s;
-        }
-
-        .school-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 35, 111, 0.1);
-        }
-
-        .school-card__image {
-            position: relative;
-            height: 160px;
-            overflow: hidden;
-        }
-
-        .school-card__image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .school-card:hover .school-card__image img {
-            transform: scale(1.05);
-        }
-
-        .rating {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(255, 255, 255, 0.92);
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #0d1c2e;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .rating .material-symbols-outlined {
-            font-size: 15px;
-            color: #735c00;
-        }
-
-        .school-card__body {
-            padding: 16px;
-        }
-
-        .badges {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background-color: #eff4ff;
-            color: #00236f;
-        }
-
-        .badge--top {
-            background-color: #fed65b;
-            color: #745c00;
-        }
-
-        .school-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #0d1c2e;
-            margin-bottom: 8px;
-        }
-
-        .school-location {
-            font-size: 14px;
-            color: #444651;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-
-        .school-location .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        .card-footer {
-            border-top: 1px solid #f1f5f9;
-            padding-top: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .avatars {
-            display: flex;
-        }
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            margin-left: -8px;
-            color: #0d1c2e;
-        }
-
-        .avatar:first-child {
-            margin-left: 0;
-        }
-
-        .avatar:nth-child(1) {
-            background-color: #e2e8f0;
-        }
-
-        .avatar:nth-child(2) {
-            background-color: #cbd5e1;
-        }
-
-        .avatar:nth-child(3) {
-            background-color: #dce1ff;
-            color: #00236f;
-        }
-
-        .detail-link {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #00236f;
-            text-decoration: none;
-            transition: gap 0.2s;
-        }
-
-        .detail-link .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        .detail-link:hover {
-            gap: 8px;
-        }
-
-        /* ── Categories ─────────────────────────────────── */
-        .categories-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: #00236f;
-            margin-bottom: 20px;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
-
-        .category-card {
-            background: #ffffff;
-            border: 1px solid #c5c5d3;
-            border-radius: 16px;
-            padding: 28px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.25s, color 0.25s;
-        }
-
-        .category-card .material-symbols-outlined {
-            font-size: 42px;
-            color: #00236f;
-            margin-bottom: 12px;
-            display: block;
-            transition: color 0.25s;
-        }
-
-        .cat-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #0d1c2e;
-            margin-bottom: 6px;
-            transition: color 0.25s;
-        }
-
-        .cat-count {
-            font-size: 12px;
-            color: #444651;
-            font-weight: 500;
-            transition: color 0.25s;
-        }
-
-        .category-card:hover {
-            background-color: #1e3a8a;
-        }
-
-        .category-card:hover .material-symbols-outlined,
-        .category-card:hover .cat-name {
-            color: #ffffff;
-        }
-
-        .category-card:hover .cat-count {
-            color: #dce1ff;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="page-wrapper">
-
-        <!-- ── Hero ─────────────────────────────────────────── -->
-        <section class="hero">
-            <h1 class="hero__title">Trouvez l'excellence<br>académique.</h1>
-            <p class="hero__subtitle">
-                Accédez au répertoire complet des établissements d'enseignement, gérez les
-                inscriptions et suivez les performances institutionnelles en temps réel.
-            </p>
-            <div class="hero__search">
-                <div class="search-field">
-                    <span class="material-symbols-outlined">search</span>
-                    <input type="text" placeholder="Nom de l'établissement" />
-                </div>
-                <div class="search-field">
-                    <span class="material-symbols-outlined">location_on</span>
-                    <input type="text" placeholder="Toute la France" />
-                </div>
-                <div class="search-field">
-                    <span class="material-symbols-outlined">tune</span>
-                    <input type="text" placeholder="Tous Niveaux" />
-                </div>
-                <button class="search-btn">Rechercher</button>
-            </div>
-        </section>
-
-        <!-- ── Stats ─────────────────────────────────────────── -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon stat-icon--blue">
-                    <span class="material-symbols-outlined">school</span>
-                </div>
-                <div>
-                    <p class="stat-label">Écoles Partenaires</p>
-                    <p class="stat-value">1,240</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-icon--yellow">
-                    <span class="material-symbols-outlined">group</span>
-                </div>
-                <div>
-                    <p class="stat-label">Étudiants Actifs</p>
-                    <p class="stat-value">45,800</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-icon--teal">
-                    <span class="material-symbols-outlined">settings</span>
-                </div>
-                <div>
-                    <p class="stat-label">Taux de Réussite</p>
-                    <p class="stat-value">94.2%</p>
-                </div>
-            </div>
+<!-- ══════════════════════════════════════════════════════════
+     CAMPUS237 — Tableau de bord (Admin / Directeur)
+══════════════════════════════════════════════════════════ -->
+
+<!-- ── TOPBAR ─────────────────────────────────────────────── -->
+<header class="hc-topbar">
+  <a routerLink="/" class="hc-brand">
+    <img src="design/campus237logo.jpeg" alt="Campus237" class="hc-brand-logo" />
+    <span class="hc-brand-name">CAMPUS<strong>237</strong></span>
+  </a>
+
+  <nav class="hc-nav">
+    <a routerLink="/" class="hc-nav-link active">
+      <span class="material-symbols-outlined">dashboard</span>
+      Tableau de bord
+    </a>
+    <a routerLink="/ListEtablissements" class="hc-nav-link">
+      <span class="material-symbols-outlined">school</span>
+      Annuaire
+    </a>
+  </nav>
+
+  <div class="hc-topbar-right">
+    <div class="hc-role-chip" [ngClass]="'role-' + userRole()">
+      <span class="material-symbols-outlined">
+        {{ isAdmin() ? 'admin_panel_settings' : 'business' }}
+      </span>
+      {{ roleLabel() }}
+    </div>
+    <div class="hc-user-chip" *ngIf="userInfo">
+      <div class="hc-user-avatar">{{ getInitials() }}</div>
+      <span class="hc-user-name">{{ userInfo.firstName }}</span>
+    </div>
+    <button class="hc-logout-btn" (click)="logout()" title="Déconnexion">
+      <span class="material-symbols-outlined">logout</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── PAGE WRAPPER ───────────────────────────────────────── -->
+<div class="hc-wrapper">
+
+  <!-- ── HERO ─────────────────────────────────────────────── -->
+  <section class="hc-hero">
+    <div class="hc-hero-glow hc-glow-1"></div>
+    <div class="hc-hero-glow hc-glow-2"></div>
+
+    <div class="hc-hero-inner">
+      <div class="hc-hero-badge">
+        <span class="material-symbols-outlined">waving_hand</span>
+        <span>Bon retour parmi nous</span>
+      </div>
+
+      <h1 class="hc-hero-title">
+        Bonjour <span class="hc-name-accent">{{ userInfo?.firstName ?? 'Utilisateur' }}</span> 👋
+      </h1>
+      <p class="hc-hero-sub">
+        <ng-container *ngIf="isAdmin()">
+          Gérez la plateforme, modérez les contenus et supervisez les établissements.
+        </ng-container>
+        <ng-container *ngIf="isDirecteur()">
+          Consultez les statistiques de votre établissement et gérez votre fiche.
+        </ng-container>
+      </p>
+
+      <!-- Search bar -->
+      <div class="hc-hero-search">
+        <div class="hc-search-field">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" placeholder="Rechercher un établissement…" />
         </div>
-
-        <!-- ── Établissements à la une ───────────────────────── -->
-        <div class="section-header">
-            <h2 class="section-title">Établissements à la une</h2>
-            <a href="#" class="see-all">
-                Voir tout <span class="material-symbols-outlined">arrow_forward</span>
-            </a>
+        <div class="hc-search-field hc-search-field--small">
+          <span class="material-symbols-outlined">location_on</span>
+          <input type="text" placeholder="Ville / Région" />
         </div>
-        <p class="section-sub">Découvrez les écoles les plus performantes de cette session académique.</p>
+        <button class="hc-search-btn">
+          <span class="material-symbols-outlined">tune</span>
+          Filtrer
+        </button>
+      </div>
+    </div>
+  </section>
 
-        <div class="schools-grid">
+  <!-- ── STATS ────────────────────────────────────────────── -->
+  <section class="hc-stats">
 
-            <!-- Card 1 -->
-            <div class="school-card">
-                <div class="school-card__image">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKKZQjDLjEF8jzSDtKjfXB_9GMsGXcfVDsxMz8gE1yf3J7J5UHuuHvfXHXPqxvn4LJCXZqMRpNwnr7eaCOVk7xzE3EIi3lH4A53QrQLKkNqRRKHZX3wlVyUEiG6HOqS1AZdkHf-9ycNFy5m5y_E5A3cj41ZjDsMgpZ0jXNr-I77sLrV9LXMUqP0P6C4bLfknFjXrLMnFVZjrfkmxhfJ-HcpS3tL3dZ6L73vAy3p78DWW0yWOe2JqhUjRtBbUFXinFovH4kEEn2A"
-                        alt="Lycée Louis-le-Grand" />
-                    <div class="rating">
-                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                        4.9
-                    </div>
-                </div>
-                <div class="school-card__body">
-                    <div class="badges">
-                        <span class="badge">Lycée d'Excellence</span>
-                        <span class="badge badge--top">TOP RANK</span>
-                    </div>
-                    <h3 class="school-name">Lycée Louis-le-Grand</h3>
-                    <p class="school-location">
-                        <span class="material-symbols-outlined">location_on</span>
-                        Paris, France
-                    </p>
-                    <div class="card-footer">
-                        <div class="avatars">
-                            <div class="avatar">JD</div>
-                            <div class="avatar">MS</div>
-                            <div class="avatar">+12</div>
-                        </div>
-                        <a href="#" class="detail-link">
-                            Détails <span class="material-symbols-outlined">chevron_right</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <!-- Skeleton -->
+    <ng-container *ngIf="isLoadingStats()">
+      <div class="hc-stat-card hc-stat-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </ng-container>
 
-            <!-- Card 2 -->
-            <div class="school-card">
-                <div class="school-card__image">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl2N4O46dCTwl1EPoB2lXs3bVjT14iAkAYKiqHlqG0V-y3E0Ei0EKBfADkQm87-g2V5xK7c7XvXWbz--_w4C_Ber8PwtVDU2YPQEJzrHNw-kvH0dOblI_1iqSRSW4bKdUJbN_EJd46amKMbmVGTB48LVWT4rG8A4YnVWByqtbUh0CY3lgNF7Fmn8mEMi9B50Bch6tblhSBc7wbHgO7_u7Gn0K4F8nIhX6DX3G1MMLA2hBNMqJf73_oJXTaGkH3lEVAd6S7g5ww"
-                        alt="HEC Paris" />
-                    <div class="rating">
-                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                        4.7
-                    </div>
-                </div>
-                <div class="school-card__body">
-                    <div class="badges">
-                        <span class="badge">École Supérieure</span>
-                    </div>
-                    <h3 class="school-name">HEC Paris</h3>
-                    <p class="school-location">
-                        <span class="material-symbols-outlined">location_on</span>
-                        Jouy-en-Josas, France
-                    </p>
-                    <div class="card-footer">
-                        <div class="avatars">
-                            <div class="avatar">AB</div>
-                            <div class="avatar">LC</div>
-                            <div class="avatar">+45</div>
-                        </div>
-                        <a href="#" class="detail-link">
-                            Détails <span class="material-symbols-outlined">chevron_right</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="school-card">
-                <div class="school-card__image">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdEq9MbR90u44nltJkVoQCmIkLEH_qnrE5hEW1bwapvxG3EPzJ0P0Qk9Bkw0zFoZxPLeXZJ8cXDLONBfBJNfT5765IzfKF2CCowAAtIwiL60zmkConAEcWHQftq5q1qt9OGuDNnpPx05hi3AixCsIfGVA4i0G_Van981kk-Yz9NgdrwPkM2NqB40erBaBO_YUpe5rgu_LOgIT-TpA_dPZcvFtGmXTMVbR2QeaRgEDhtn-fSDY2Mgs2B5X6kcRaEh5lTpr6zaXsgEw"
-                        alt="Collège Stanislas" />
-                    <div class="rating">
-                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                        4.8
-                    </div>
-                </div>
-                <div class="school-card__body">
-                    <div class="badges">
-                        <span class="badge">Collège Privé</span>
-                    </div>
-                    <h3 class="school-name">Collège Stanislas</h3>
-                    <p class="school-location">
-                        <span class="material-symbols-outlined">location_on</span>
-                        Paris, France
-                    </p>
-                    <div class="card-footer">
-                        <div class="avatars">
-                            <div class="avatar">KR</div>
-                            <div class="avatar">PT</div>
-                            <div class="avatar">+8</div>
-                        </div>
-                        <a href="#" class="detail-link">
-                            Détails <span class="material-symbols-outlined">chevron_right</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
+    <!-- Admin stats -->
+    <ng-container *ngIf="!isLoadingStats() && isAdmin()">
+      <div class="hc-stat-card hc-stat--blue">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">school</span>
         </div>
-
-        <!-- ── Explorer par catégories ──────────────────────── -->
-        <h2 class="categories-title">Explorer par catégories</h2>
-        <div class="categories-grid">
-            <div class="category-card">
-                <span class="material-symbols-outlined">palette</span>
-                <p class="cat-name">Arts &amp; Design</p>
-                <p class="cat-count">124 Établissements</p>
-            </div>
-            <div class="category-card">
-                <span class="material-symbols-outlined">biotech</span>
-                <p class="cat-name">Sciences</p>
-                <p class="cat-count">256 Établissements</p>
-            </div>
-            <div class="category-card">
-                <span class="material-symbols-outlined">balance</span>
-                <p class="cat-name">Droit &amp; Économie</p>
-                <p class="cat-count">89 Établissements</p>
-            </div>
-            <div class="category-card">
-                <span class="material-symbols-outlined">engineering</span>
-                <p class="cat-name">Ingénierie</p>
-                <p class="cat-count">178 Établissements</p>
-            </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ totalEtablissements() }}</span>
+          <span class="hc-stat-label">Établissements</span>
         </div>
+        <span class="hc-stat-trend hc-trend--up">
+          <span class="material-symbols-outlined">trending_up</span>
+          +12%
+        </span>
+      </div>
 
+      <div class="hc-stat-card hc-stat--purple">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">group</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ totalUsers() }}</span>
+          <span class="hc-stat-label">Utilisateurs</span>
+        </div>
+        <span class="hc-stat-trend hc-trend--up">
+          <span class="material-symbols-outlined">trending_up</span>
+          +8%
+        </span>
+      </div>
+
+      <div class="hc-stat-card hc-stat--amber">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">pending_actions</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ pendingComments() }}</span>
+          <span class="hc-stat-label">Avis à modérer</span>
+        </div>
+        <a routerLink="/admin/commentaires" class="hc-stat-action">
+          Voir <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+
+      <div class="hc-stat-card hc-stat--teal">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">hourglass_empty</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ pendingEstablishments() }}</span>
+          <span class="hc-stat-label">Fiches en attente</span>
+        </div>
+        <a routerLink="/ListEtablissements" class="hc-stat-action">
+          Voir <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+    </ng-container>
+
+    <!-- Directeur stats -->
+    <ng-container *ngIf="!isLoadingStats() && isDirecteur()">
+      <div class="hc-stat-card hc-stat--blue">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">business</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ totalEtablissements() }}</span>
+          <span class="hc-stat-label">Établissements</span>
+        </div>
+      </div>
+
+      <div class="hc-stat-card hc-stat--green">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">star</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ totalComments() }}</span>
+          <span class="hc-stat-label">Avis reçus</span>
+        </div>
+      </div>
+
+      <div class="hc-stat-card hc-stat--amber">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">schedule</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">{{ pendingComments() }}</span>
+          <span class="hc-stat-label">Avis en attente</span>
+        </div>
+      </div>
+
+      <div class="hc-stat-card hc-stat--purple">
+        <div class="hc-stat-icon">
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+        <div class="hc-stat-info">
+          <span class="hc-stat-value">94%</span>
+          <span class="hc-stat-label">Taux de satisfaction</span>
+        </div>
+      </div>
+    </ng-container>
+  </section>
+
+  <!-- ── ACTIONS RAPIDES ──────────────────────────────────── -->
+  <section class="hc-section">
+    <div class="hc-section-header">
+      <div>
+        <h2 class="hc-section-title">Actions rapides</h2>
+        <p class="hc-section-sub">Accédez rapidement aux fonctionnalités principales</p>
+      </div>
     </div>
 
-</body>
+    <div class="hc-actions-grid">
+      <a
+        *ngFor="let action of quickActions()"
+        [routerLink]="action.route"
+        class="hc-action-card"
+        [style.--action-color]="action.color"
+      >
+        <div class="hc-action-icon">
+          <span class="material-symbols-outlined">{{ action.icon }}</span>
+        </div>
+        <div class="hc-action-info">
+          <h3 class="hc-action-label">{{ action.label }}</h3>
+          <p class="hc-action-desc">{{ action.description }}</p>
+        </div>
+        <span class="material-symbols-outlined hc-action-arrow">arrow_forward</span>
+      </a>
+    </div>
+  </section>
 
-</html>
+  <!-- ── GRILLE 2 COLONNES ────────────────────────────────── -->
+  <div class="hc-two-cols">
+
+    <!-- Colonne gauche : Établissements récents -->
+    <section class="hc-section">
+      <div class="hc-section-header">
+        <div>
+          <h2 class="hc-section-title">
+            <span class="material-symbols-outlined">school</span>
+            Établissements récents
+          </h2>
+          <p class="hc-section-sub">Dernières fiches ajoutées à la plateforme</p>
+        </div>
+        <a routerLink="/ListEtablissements" class="hc-see-all">
+          Voir tout <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="hc-etab-list" *ngIf="isLoadingEtabs()">
+        <div class="hc-etab-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+      </div>
+
+      <!-- Liste -->
+      <div class="hc-etab-list" *ngIf="!isLoadingEtabs()">
+        <a
+          *ngFor="let e of recentEtabs()"
+          [routerLink]="['/etablissement', e.id]"
+          class="hc-etab-card"
+        >
+          <div class="hc-etab-type-dot" [style.background]="getTypeColor(e.type)"></div>
+          <div class="hc-etab-info">
+            <h4 class="hc-etab-name">{{ e.nom }}</h4>
+            <p class="hc-etab-meta">
+              <span class="material-symbols-outlined">location_on</span>
+              {{ e.ville }}<span *ngIf="e.region">, {{ e.region }}</span>
+            </p>
+          </div>
+          <div class="hc-etab-right">
+            <span class="hc-etab-type-badge" [style.background]="getTypeColor(e.type)">
+              {{ getTypeLabel(e.type) }}
+            </span>
+            <span class="hc-etab-statut" [style.color]="getStatutColor(e.statut)">
+              <span class="material-symbols-outlined" style="font-size:14px">
+                {{ e.statut === 'publie' ? 'check_circle' : e.statut === 'en_attente' ? 'schedule' : 'cancel' }}
+              </span>
+              {{ getStatutLabel(e.statut) }}
+            </span>
+          </div>
+        </a>
+
+        <div class="hc-empty-inline" *ngIf="recentEtabs().length === 0">
+          <span class="material-symbols-outlined">inbox</span>
+          <p>Aucun établissement pour le moment</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Colonne droite : Activité récente -->
+    <section class="hc-section">
+      <div class="hc-section-header">
+        <div>
+          <h2 class="hc-section-title">
+            <span class="material-symbols-outlined">history</span>
+            Activité récente
+          </h2>
+          <p class="hc-section-sub">Dernières actions sur la plateforme</p>
+        </div>
+      </div>
+
+      <div class="hc-activity-list">
+        <div
+          *ngFor="let act of recentActivities(); let i = index"
+          class="hc-activity-item"
+        >
+          <div class="hc-activity-icon" [style.background]="act.color + '15'" [style.color]="act.color">
+            <span class="material-symbols-outlined">{{ act.icon }}</span>
+          </div>
+          <div class="hc-activity-info">
+            <h4 class="hc-activity-title">{{ act.title }}</h4>
+            <p class="hc-activity-desc">{{ act.description }}</p>
+          </div>
+          <span class="hc-activity-time">{{ act.time }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── COMMENTAIRES RÉCENTS ─────────────────────────────── -->
+  <section class="hc-section">
+    <div class="hc-section-header">
+      <div>
+        <h2 class="hc-section-title">
+          <span class="material-symbols-outlined">rate_review</span>
+          Commentaires récents
+        </h2>
+        <p class="hc-section-sub">Derniers avis soumis par les étudiants</p>
+      </div>
+      <a *ngIf="isAdmin()" routerLink="/admin/commentaires" class="hc-see-all">
+        Modérer tout <span class="material-symbols-outlined">arrow_forward</span>
+      </a>
+    </div>
+
+    <!-- Skeleton -->
+    <div class="hc-comments-grid" *ngIf="isLoadingComments()">
+      <div class="hc-comment-skeleton" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <!-- Liste -->
+    <div class="hc-comments-grid" *ngIf="!isLoadingComments()">
+      <div *ngFor="let c of recentComments()" class="hc-comment-card">
+        <div class="hc-comment-head">
+          <div class="hc-comment-avatar">{{ getInitialsFromName(c.auteur_nom) }}</div>
+          <div class="hc-comment-meta">
+            <span class="hc-comment-author">{{ c.auteur_nom }}</span>
+            <span class="hc-comment-date">{{ formatDate(c.date_publication) }}</span>
+          </div>
+          <span
+            class="hc-comment-statut"
+            [style.background]="getStatutColor(c.statut) + '18'"
+            [style.color]="getStatutColor(c.statut)"
+          >
+            {{ getStatutLabel(c.statut) }}
+          </span>
+        </div>
+        <p class="hc-comment-text">
+          {{ c.contenu.length > 120 ? (c.contenu | slice:0:120) + '…' : c.contenu }}
+        </p>
+        <div class="hc-comment-foot">
+          <div class="hc-comment-stars">
+            <span
+              *ngFor="let s of [1,2,3,4,5]"
+              class="material-symbols-outlined"
+              [class.filled]="s <= c.note"
+            >star</span>
+          </div>
+          <span class="hc-comment-etab">
+            <span class="material-symbols-outlined">business</span>
+            {{ c.etablissement_nom || 'Établissement' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="hc-empty-inline hc-empty-inline--full" *ngIf="recentComments().length === 0">
+        <span class="material-symbols-outlined">forum</span>
+        <p>Aucun commentaire pour le moment</p>
+      </div>
+    </div>
+  </section>
+
+</div>

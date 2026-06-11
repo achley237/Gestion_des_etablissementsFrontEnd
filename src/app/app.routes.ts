@@ -6,24 +6,21 @@ import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './register/register.component';
 import { DasboardAddSchoolsComponent } from './pages/dasboard-add-schools/dasboard-add-schools.component';
 import { DasboardListEtablissementComponent } from './pages/dasboard-list-etablissement/dasboard-list-etablissement.component';
-
+import { DashboardDetailEtablissementComponent } from './pages/dashboard-detail-etablissement/dashboard-detail-etablissement.component';
+import { AcceuilEtudiantsComponent } from './components/acceuil-etudiants/acceuil-etudiants.component';
+import { DashboardListCommentaireComponent } from './pages/dashboard-list-commentaire/dashboard-list-commentaire.component';
+import { DashboardListUtilisateursComponent } from './pages/dashboard-list-utilisateurs/dashboard-list-utilisateurs.component';
 
 export const routes: Routes = [
-  // 1. Redirection par défaut (si l'utilisateur tape juste l'adresse racine)
+
+  // ── Publiques ─────────────────────────────────────────────
   {
     path: '',
     component: HomeComponent
   },
-  
-  // 2. Routes publiques pour l'Authentification (pas de Guard ici)
   {
     path: 'auth',
     component: AuthComponent,
-    title: 'Authentification | Campus237'
-  },
-  {
-    path: 'register',
-    component: RegisterComponent,
     title: 'Authentification | Campus237'
   },
   {
@@ -36,28 +33,62 @@ export const routes: Routes = [
     component: AuthComponent,
     title: 'Inscription | Campus237'
   },
-
-  // 3. Route protégée pour l'administration (Sidebar + Contenu principal lié)
+  {
+    path: 'register',
+    component: RegisterComponent,
+    title: 'Inscription | Campus237'
+  },
+  // ── Protégées ─────────────────────────────────────────────
+  {
+    path: 'Admin/utilisateurs',
+    component: DashboardListUtilisateursComponent,
+    title: 'Fiche Utilisateurs | Campus237',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'Admin/commentaires',
+    component: DashboardListCommentaireComponent,
+    title: 'Fiche établissement | Campus237',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'utilisateur/accueil',
+    component: AcceuilEtudiantsComponent,
+    title: 'Fiche établissement | Campus237',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'etablissements/:id',
+    component: DashboardDetailEtablissementComponent,
+    title: 'Fiche établissement | Campus237',
+    canActivate: [authGuard]
+  },
   {
     path: 'admin/accueil',
     component: DashboardAcceuilComponent,
     title: 'Accueil Admin | Campus237',
-    canActivate: [authGuard] // Bloque l'accès si le jeton JWT n'est pas valide/présent
+    canActivate: [authGuard]
   },
   {
     path: 'director/addSchools',
     component: DasboardAddSchoolsComponent,
-    title: 'addSchools director | Campus237',
-    canActivate: [authGuard] // Bloque l'accès si le jeton JWT n'est pas valide/présent
+    title: 'Ajouter un établissement | Campus237',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'director/editSchools/:id',
+    component: DasboardAddSchoolsComponent,
+    title: 'Modifier un établissement | Campus237',
+    canActivate: [authGuard]
   },
   {
     path: 'ListEtablissements',
     component: DasboardListEtablissementComponent,
-    title: 'List school director | Campus237',
-    canActivate: [authGuard] // Bloque l'accès si le jeton JWT n'est pas valide/présent
+    title: 'Liste des établissements | Campus237',
+    canActivate: [authGuard]
   },
 
-  // 4. Gestion des routes inconnues ou inexistantes (Joker)
+  // ── Joker ─────────────────────────────────────────────────
   {
     path: '**',
     redirectTo: 'auth/connexion'

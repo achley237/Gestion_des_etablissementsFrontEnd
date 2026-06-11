@@ -4,11 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 
-export interface Role {
-  value: string;
-  label: string;
-}
-
 @Component({
   selector: 'app-auth',
   standalone: true,
@@ -18,42 +13,14 @@ export interface Role {
 })
 export class AuthComponent implements OnDestroy {
 
-  // ── Rôles ────────────────────────────────────────────────────────────────
-  roles: Role[] = [
-    { value: 'visiteur', label: 'Visiteur' },
-    { value: 'directeur', label: 'Directeur' },
-    { value: 'admin', label: 'Admin' },
-  ];
-  selectedRole = 'directeur';
-
-  selectRole(value: string): void {
-    this.selectedRole = value;
-  }
-
-  getRoleIcon(value: string): string {
-    const icons: Record<string, string> = {
-      visiteur: 'person_outline',
-      directeur: 'badge',
-      admin: 'admin_panel_settings',
-    };
-    return icons[value] ?? 'person_outline';
-  }
-
-  getRoleClass(value: string): string {
-    const base = 'group flex flex-col items-center p-3 rounded-lg border transition-all ';
-    return value === this.selectedRole
-      ? base + 'bg-primary-container text-on-primary-container border-primary'
-      : base + 'border-outline-variant hover:border-primary hover:bg-surface-container-low';
-  }
-
-  // ── Champs de saisie ─────────────────────────────────────────────────────
-  loginEmail = '';
+  // ── Champs de saisie ─────────────────────────────────────
+  loginEmail    = '';
   loginPassword = '';
-  showPassword = false;
-  rememberMe = false;
+  showPassword  = false;
+  rememberMe    = false;
 
-  // ── Validations ──────────────────────────────────────────────────────────
-  emailError = '';
+  // ── Validations ──────────────────────────────────────────
+  emailError    = '';
   passwordError = '';
 
   validateEmail(): void {
@@ -73,8 +40,8 @@ export class AuthComponent implements OnDestroy {
     this.showPassword = !this.showPassword;
   }
 
-  // ── Chargement & Notifications (Toast) ───────────────────────────────────
-  isLoading = false;
+  // ── État ─────────────────────────────────────────────────
+  isLoading    = false;
   toastMessage = '';
   toastIsError = false;
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -83,15 +50,14 @@ export class AuthComponent implements OnDestroy {
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastMessage = message;
     this.toastIsError = isError;
-    this.toastTimer = setTimeout(() => (this.toastMessage = ''), 4000);
+    this.toastTimer   = setTimeout(() => (this.toastMessage = ''), 4000);
   }
 
   constructor(
     private authService: AuthService,
     private router: Router,
-  ) { }
+  ) {}
 
-  // ── Soumission du formulaire dans AuthComponent ─────────────────────────────
   onLogin(): void {
     this.validateEmail();
     this.validatePassword();
@@ -103,32 +69,37 @@ export class AuthComponent implements OnDestroy {
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading    = true;
     this.toastMessage = '';
 
     this.authService.login({
-      email: this.loginEmail,
+      email:    this.loginEmail,
       password: this.loginPassword,
     }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isLoading = false;
         this.showToast('Connexion réussie ! Analyse du profil...');
 
         setTimeout(() => {
-          // Récupération automatique du rôle depuis le Token décodé
+          if (response.redirect_to) {
+            const redirectMap: Record<string, string> = {
+              '/dashboard/admin':      '/admin/accueil',
+              '/dashboard/directeur':  '/admin/accueil',
+              '/dashboard/utilisateur': '/utilisateur/accueil',
+            };
+            const route = redirectMap[response.redirect_to] ?? '/';
+            this.router.navigate([route]);
+            return;
+          }
+
+          // Fallback sur le rôle JWT
           const role = this.authService.getUserRole();
-
-          console.log('Rôle détecté pour la redirection :', role);
-
-          // Redirection dynamique selon le rôle inscrit dans la base de données
           if (role === 'admin' || role === 'ADMIN') {
             this.router.navigate(['/admin/accueil']);
-          } else if (role === 'directeur' || role === 'director' || role === 'DIRECTEUR') {
+          } else if (role === 'directeur' || role === 'DIRECTEUR') {
             this.router.navigate(['/admin/accueil']);
           } else {
-            // Rôle utilisateur simple ou inconnu
-            this.showToast('Accès restreint : Rôle non autorisé.', true);
-            // Optionnel : this.router.navigate(['/user/accueil']);
+            this.router.navigate(['/']);
           }
         }, 1200);
       },
@@ -139,10 +110,9 @@ export class AuthComponent implements OnDestroy {
     });
   }
 
-  // ── Mot de passe oublié ──────────────────────────────────────────────────
   forgotPassword(): void {
     if (!this.loginEmail) {
-      this.showToast('Saisissez d\'abord votre adresse e-mail dans le formulaire.', true);
+      this.showToast("Saisissez d'abord votre adresse e-mail dans le formulaire.", true);
       return;
     }
     this.showToast(`Lien de réinitialisation envoyé à : ${this.loginEmail}`);

@@ -1,36 +1,121 @@
-<div class="list-container">
-  <div class="header-section">
-    <h2 class="page-title">Registre des Établissements</h2>
-    <p class="page-subtitle">Consultez et gérez les structures d'enseignement enregistrées sur Campus237.</p>
+<div class="c237-root">
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <div class="c237-topbar">
+    <div class="c237-topbar-inner">
+      <div>
+        <p class="c237-page-label">Campus237 — Registre</p>
+        <h1 class="c237-page-title">Établissements</h1>
+        <p class="c237-page-sub">Consultez et gérez les structures enregistrées sur la plateforme.</p>
+      </div>
+      @if (userRole() === 'directeur') {
+      <button class="c237-add-btn" routerLink="/director/addSchools">
+        <span class="material-symbols-outlined">add</span>
+        Ajouter un établissement
+      </button>
+      }
+    </div>
   </div>
 
-  @if (errorMessage()) {
-    <div class="banner error-banner">
+  <div class="c237-content">
+
+    <!-- ── Stat cards ──────────────────────────────── -->
+    <div class="c237-stats">
+      <div class="c237-stat">
+        <div class="c237-stat-ico ico-blue">
+          <span class="material-symbols-outlined">domain</span>
+        </div>
+        <div>
+          <div class="c237-stat-val">{{ establishments().length }}</div>
+          <div class="c237-stat-lbl">Total</div>
+        </div>
+      </div>
+      <div class="c237-stat">
+        <div class="c237-stat-ico ico-yellow">
+          <span class="material-symbols-outlined">schedule</span>
+        </div>
+        <div>
+          <div class="c237-stat-val">{{ countByStatus('en_attente') }}</div>
+          <div class="c237-stat-lbl">En attente</div>
+        </div>
+      </div>
+      <div class="c237-stat">
+        <div class="c237-stat-ico ico-green">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div>
+          <div class="c237-stat-val">{{ countByStatus('publie') }}</div>
+          <div class="c237-stat-lbl">Publiés</div>
+        </div>
+      </div>
+      <div class="c237-stat">
+        <div class="c237-stat-ico ico-red">
+          <span class="material-symbols-outlined">cancel</span>
+        </div>
+        <div>
+          <div class="c237-stat-val">{{ countByStatus('rejete') }}</div>
+          <div class="c237-stat-lbl">Rejetés</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Banners ─────────────────────────────────── -->
+    @if (errorMessage()) {
+    <div class="c237-banner c237-banner--error">
       <span class="material-symbols-outlined">error</span>
       <span>{{ errorMessage() }}</span>
     </div>
-  }
-  @if (successMessage()) {
-    <div class="banner success-banner">
+    }
+    @if (successMessage()) {
+    <div class="c237-banner c237-banner--success">
       <span class="material-symbols-outlined">check_circle</span>
       <span>{{ successMessage() }}</span>
     </div>
-  }
+    }
 
-  <div class="glass-table-card">
-    @if (isLoading()) {
-      <div class="loader-box">
-        <div class="spinner"></div>
-        <p>Récupération des données réseau...</p>
+    <!-- ── Toolbar ─────────────────────────────────── -->
+    <div class="c237-toolbar">
+      <div class="c237-search-wrap">
+        <span class="material-symbols-outlined c237-search-ico">search</span>
+        <input class="c237-search" type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+          placeholder="Rechercher..." />
       </div>
-    } @else if (establishments().length === 0) {
-      <div class="empty-box">
-        <span class="material-symbols-outlined">school</span>
-        <p>Aucun établissement répertorié pour le moment.</p>
+      <select class="c237-filter-select" [ngModel]="filterType()" (ngModelChange)="filterType.set($event)">
+        <option value="">Tous les types</option>
+        <option value="primaire">Primaire</option>
+        <option value="secondaire">Secondaire</option>
+        <option value="lycee">Lycée</option>
+        <option value="universite">Université</option>
+      </select>
+      <select class="c237-filter-select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+        <option value="">Tous les statuts</option>
+        <option value="en_attente">En attente</option>
+        <option value="publie">Publié</option>
+        <option value="rejete">Rejeté</option>
+        <option value="brouillon">Brouillon</option>
+        <option value="archive">Archivé</option>
+      </select>
+      <button class="c237-reset-btn" (click)="resetFilters()">
+        Réinitialiser
+      </button>
+    </div>
+
+    <!-- ── Table ───────────────────────────────────── -->
+    <div class="c237-table-card">
+
+      @if (isLoading()) {
+      <div class="c237-state-box">
+        <div class="c237-spinner"></div>
+        <p>Chargement des données…</p>
       </div>
-    } @else {
-      <div class="responsive-wrapper">
-        <table class="modern-table">
+      } @else if (filtered().length === 0) {
+      <div class="c237-state-box">
+        <span class="material-symbols-outlined c237-empty-ico">school</span>
+        <p>Aucun établissement trouvé.</p>
+      </div>
+      } @else {
+      <div class="c237-responsive">
+        <table class="c237-table">
           <thead>
             <tr>
               <th>Établissement</th>
@@ -38,58 +123,138 @@
               <th>Localisation</th>
               <th>Contact</th>
               <th>Statut</th>
-              @if (userRole() === 'admin' || userRole() === 'administrateur') {
-                <th class="text-center">Modération Admin</th>
+              <!-- La colonne actions est visible pour Admin ET Directeur -->
+              @if (userRole() === 'admin' || userRole() === 'administrateur' || userRole() === 'directeur') {
+              <th style="text-align:center">Actions</th>
               }
             </tr>
           </thead>
           <tbody>
-            @for (school of establishments(); track school.id) {
-              <tr>
-                <td>
-                  <div class="title-cell">
-                    <span class="main-name">{{ school.nom }}</span>
-                    <span class="sub-info">Création : {{ school.annee_creation || 'Inconnue' }}</span>
+            @for (school of paginated(); track school.id) {
+            <tr>
+              <td>
+                <div class="c237-school-cell">
+                  <div class="c237-school-avatar">
+                    {{ getInitials(school.nom) }}
                   </div>
-                </td>
-                <td><span class="type-badge">{{ school.type }}</span></td>
-                <td>{{ school.ville }} ({{ school.pays }})</td>
-                <td>
-                  <div class="contact-info">
-                    <span>{{ school.email || 'Aucun email' }}</span>
-                    <span class="sub-info">{{ school.telephone || 'Aucun contact' }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="status-pill" [ngClass]="getStatusClass(school.statut)">
-                    {{ school.statut === 'en_attente' ? 'En attente' : school.statut }}
-                  </span>
-                  @if (school.statut === 'rejete' && school.motif_rejet) {
-                    <p class="reject-reason" [title]="school.motif_rejet">Motif: {{ school.motif_rejet }}</p>
-                  }
-                </td>
-                
-                @if (userRole() === 'admin' || userRole() === 'administrateur') {
-                  <td>
-                    <div class="buttons-wrapper">
-                      @if (school.statut === 'en_attente') {
-                        <button class="action-btn approve" (click)="onApprove(school)">
-                          <span class="material-symbols-outlined">done</span> Approuver
-                        </button>
-                        <button class="action-btn reject" (click)="onReject(school)">
-                          <span class="material-symbols-outlined">close</span> Rejeter
-                        </button>
-                      } @else {
-                        <span class="archived-text">Aucune action requise</span>
-                      }
+                  <div>
+                    <div class="c237-school-name">{{ school.nom }}</div>
+                    <div class="c237-school-meta">
+                      Créé en {{ school.annee_creation || '—' }}
+                      @if (school.capacite) { · {{ school.capacite | number }} places }
                     </div>
-                  </td>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="c237-type-badge">
+                  <span class="material-symbols-outlined" style="font-size:14px">school</span>
+                  {{ school.type | titlecase }}
+                </span>
+              </td>
+              <td>
+                <div class="c237-loc">
+                  <span class="material-symbols-outlined">location_on</span>
+                  {{ school.ville }}{{ school.region ? ', ' + school.region : '' }}
+                </div>
+              </td>
+              <td>
+                <div class="c237-contact">
+                  <span>{{ school.email || 'Aucun email' }}</span>
+                  <span class="c237-contact-sub">{{ school.telephone || 'Aucun contact' }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="getStatusClass(school.statut)">
+                  {{ getStatusLabel(school.statut) }}
+                </span>
+                @if (school.statut === 'rejete' && school.motif_rejet) {
+                <p class="c237-reject-reason" [title]="school.motif_rejet">
+                  Motif : {{ school.motif_rejet }}
+                </p>
                 }
-              </tr>
+              </td>
+
+              <!-- ── COLONNE ACTIONS DYNAMIQUE ── -->
+              @if (userRole() === 'admin' || userRole() === 'administrateur' || userRole() === 'directeur') {
+              <td>
+                <div class="c237-actions">
+
+                  <!-- 1. Action commune : Voir -->
+                  <button class="c237-action-btn" title="Voir les détails" (click)="onView(school.id)">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+
+                  <!-- 2. Actions pour le DIRECTEUR -->
+                  @if (userRole() === 'directeur') {
+                  @if (school.statut === 'brouillon' || school.statut === 'rejete') {
+                  <button class="c237-action-btn edit" title="Modifier" (click)="onEdit(school.id)">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button class="c237-action-btn submit" title="Soumettre à validation"
+                    (click)="onSubmitForValidation(school)">
+                    <span class="material-symbols-outlined">send</span>
+                  </button>
+                  }
+                  @if (school.statut === 'publie' || school.statut === 'brouillon') {
+                  <button class="c237-action-btn archive" title="Archiver" (click)="onArchive(school)">
+                    <span class="material-symbols-outlined">archive</span>
+                  </button>
+                  }
+                  }
+
+                  <!-- 3. Actions pour l'ADMIN -->
+                  @if (userRole() === 'admin' || userRole() === 'administrateur') {
+                  @if (school.statut === 'en_attente') {
+                  <button class="c237-action-btn approve" title="Approuver" (click)="onApprove(school)">
+                    <span class="material-symbols-outlined">check</span>
+                  </button>
+                  <button class="c237-action-btn reject" title="Rejeter" (click)="onReject(school)">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                  }
+
+                  <button class="c237-action-btn archive" title="Archiver" (click)="onArchive(school)">
+                    <span class="material-symbols-outlined">archive</span>
+                  </button>
+
+                  <button class="c237-action-btn delete" title="Supprimer définitivement" (click)="onDelete(school)">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                  }
+
+                </div>
+              </td>
+              }
+            </tr>
             }
           </tbody>
         </table>
       </div>
-    }
+
+      <!-- ── Pagination ─────────────────────────── -->
+      <div class="c237-pagination">
+        <span>
+          Affichage de
+          <strong>{{ paginationStart() }}–{{ paginationEnd() }}</strong>
+          sur <strong>{{ filtered().length }}</strong> établissements
+        </span>
+        <div class="c237-pages">
+          <button class="c237-page-btn" (click)="prevPage()" [disabled]="currentPage() === 1">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          @for (p of pageNumbers(); track p) {
+          <button class="c237-page-btn" [class.active]="p === currentPage()" (click)="goToPage(p)">
+            {{ p }}
+          </button>
+          }
+          <button class="c237-page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+
   </div>
 </div>

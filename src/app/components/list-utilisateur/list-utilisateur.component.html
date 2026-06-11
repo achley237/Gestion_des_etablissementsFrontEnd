@@ -1,0 +1,534 @@
+<div class="admin-container">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <a routerLink="/admin" class="admin-back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Retour dashboard
+      </a>
+      <h1 class="admin-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87" />
+          <path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>
+        Gestion des utilisateurs
+      </h1>
+    </div>
+    <button class="admin-refresh-btn" (click)="loadUsers()" [disabled]="isLoading()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10" />
+        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+      </svg>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- ── STATS CARDS ────────────────────────────────────────── -->
+  <div class="admin-stats-row">
+    <div class="admin-stat-card stat-total">
+      <span class="stat-number">{{ allUsers().length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="admin-stat-card stat-active">
+      <span class="stat-number">{{ activeCount() }}</span>
+      <span class="stat-label">Actifs</span>
+    </div>
+    <div class="admin-stat-card stat-suspended">
+      <span class="stat-number">{{ suspendedCount() }}</span>
+      <span class="stat-label">Suspendus</span>
+    </div>
+    <div class="admin-stat-card stat-banned">
+      <span class="stat-number">{{ bannedCount() }}</span>
+      <span class="stat-label">Bannis</span>
+    </div>
+  </div>
+
+  <!-- ── SOUS-STATS PAR RÔLE ────────────────────────────────── -->
+  <div class="role-stats-row">
+    <div class="role-stat">
+      <span class="role-stat-icon">👔</span>
+      <div class="role-stat-info">
+        <span class="role-stat-num">{{ directeurCount() }}</span>
+        <span class="role-stat-label">Directeurs</span>
+      </div>
+    </div>
+    <div class="role-stat">
+      <span class="role-stat-icon">🎓</span>
+      <div class="role-stat-info">
+        <span class="role-stat-num">{{ utilisateurCount() }}</span>
+        <span class="role-stat-label">Utilisateurs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FILTRES ────────────────────────────────────────────── -->
+  <div class="admin-filters">
+    <div class="filter-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Rechercher par nom, prénom, email ou fonction…"
+        class="filter-search-input"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Rôle</label>
+      <div class="filter-pills">
+        <button
+          class="filter-pill"
+          [class.active]="filterRole() === ''"
+          (click)="filterRole.set('')"
+        >
+          Tous
+        </button>
+        <button
+          class="filter-pill pill-directeur"
+          [class.active]="filterRole() === 'directeur'"
+          (click)="filterRole.set('directeur')"
+        >
+          👔 Directeurs
+        </button>
+        <button
+          class="filter-pill pill-utilisateur"
+          [class.active]="filterRole() === 'utilisateur'"
+          (click)="filterRole.set('utilisateur')"
+        >
+          🎓 Utilisateurs
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Statut</label>
+      <div class="filter-pills">
+        <button
+          class="filter-pill"
+          [class.active]="filterStatut() === ''"
+          (click)="filterStatut.set('')"
+        >
+          Tous
+        </button>
+        <button
+          class="filter-pill pill-active"
+          [class.active]="filterStatut() === 'actif'"
+          (click)="filterStatut.set('actif')"
+        >
+          ✓ Actifs
+        </button>
+        <button
+          class="filter-pill pill-suspended"
+          [class.active]="filterStatut() === 'suspendu'"
+          (click)="filterStatut.set('suspendu')"
+        >
+          ⏸ Suspendus
+        </button>
+        <button
+          class="filter-pill pill-banned"
+          [class.active]="filterStatut() === 'banni'"
+          (click)="filterStatut.set('banni')"
+        >
+          ⛔ Bannis
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LISTE ──────────────────────────────────────────────── -->
+  <div class="admin-list">
+
+    <!-- Skeleton -->
+    <div *ngIf="isLoading()" class="skeleton-list">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+
+    <!-- Liste réelle -->
+    <ng-container *ngIf="!isLoading()">
+
+      <div
+        class="user-card"
+        *ngFor="let u of filteredUsers()"
+        [class.processing]="isProcessing(u.id)"
+      >
+        <!-- Avatar + Infos -->
+        <div class="user-card-main">
+          <div class="user-avatar" [ngClass]="getRoleClass(u.role)">
+            {{ getInitials(u.prenom, u.nom) }}
+          </div>
+
+          <div class="user-info">
+            <div class="user-name-row">
+              <h3 class="user-name">{{ u.prenom }} {{ u.nom }}</h3>
+              <span class="role-badge" [ngClass]="getRoleClass(u.role)">
+                {{ getRoleLabel(u.role) }}
+              </span>
+            </div>
+
+            <div class="user-meta">
+              <span class="user-email">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+                {{ u.email }}
+              </span>
+              <span class="user-fonction" *ngIf="u.fonction">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+                </svg>
+                {{ u.fonction }}
+              </span>
+              <span class="user-date">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Inscrit le {{ formatDate(u.date_inscription) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statut + Actions -->
+        <div class="user-card-actions">
+          <span class="statut-badge" [ngClass]="getStatutClass(u.statut)">
+            <span class="statut-icon">{{ getStatutIcon(u.statut) }}</span>
+            {{ getStatutLabel(u.statut) }}
+          </span>
+
+          <div class="action-buttons">
+            <button
+              class="action-btn btn-detail"
+              (click)="openDetail(u)"
+              title="Voir les détails"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+
+            <!-- Si actif → proposer suspendre ou bannir -->
+            <ng-container *ngIf="u.statut === 'actif'">
+              <button
+                class="action-btn btn-suspend"
+                (click)="openStatutModal(u, 'suspendu')"
+                [disabled]="isProcessing(u.id)"
+                title="Suspendre"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+                Suspendre
+              </button>
+              <button
+                class="action-btn btn-ban"
+                (click)="openStatutModal(u, 'banni')"
+                [disabled]="isProcessing(u.id)"
+                title="Bannir"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                </svg>
+                Bannir
+              </button>
+            </ng-container>
+
+            <!-- Si suspendu ou banni → proposer réactiver -->
+            <ng-container *ngIf="u.statut !== 'actif'">
+              <button
+                class="action-btn btn-activate"
+                (click)="quickActivate(u)"
+                [disabled]="isProcessing(u.id)"
+                title="Réactiver"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                {{ isProcessing(u.id) ? '...' : 'Réactiver' }}
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- État vide -->
+      <div class="empty-state" *ngIf="filteredUsers().length === 0">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+        </svg>
+        <p>Aucun utilisateur trouvé.</p>
+        <button class="empty-reset-btn" (click)="filterRole.set(''); filterStatut.set(''); searchQuery.set('')">
+          Réinitialiser les filtres
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL CHANGEMENT DE STATUT
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="statutModalUser()" (click)="closeStatutModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <button class="modal-close" (click)="closeStatutModal()" aria-label="Fermer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+
+    <div class="modal-header" [ngClass]="'modal-header-' + newStatut()">
+      <!-- Icône selon le statut -->
+      <svg *ngIf="newStatut() === 'suspendu'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+        <rect x="6" y="4" width="4" height="16" />
+        <rect x="14" y="4" width="4" height="16" />
+      </svg>
+      <svg *ngIf="newStatut() === 'banni'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+      </svg>
+      <h3>
+        {{ newStatut() === 'suspendu' ? 'Suspendre' : 'Bannir' }} cet utilisateur
+      </h3>
+    </div>
+
+    <div class="modal-body" *ngIf="statutModalUser() as u">
+      <p class="modal-info">
+        Vous êtes sur le point de
+        <strong>{{ newStatut() === 'suspendu' ? 'suspendre' : 'bannir' }}</strong>
+        le compte de <strong>{{ u.prenom }} {{ u.nom }}</strong>
+        (<span class="modal-email">{{ u.email }}</span>).
+      </p>
+
+      <div class="modal-warning" [ngClass]="'warning-' + newStatut()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <div>
+          <strong>Un email de notification sera automatiquement envoyé</strong>
+          à l'utilisateur pour l'informer de cette décision.
+        </div>
+      </div>
+
+      <div class="modal-preview">
+        <div class="preview-user">
+          <div class="preview-avatar" [ngClass]="getRoleClass(u.role)">
+            {{ getInitials(u.prenom, u.nom) }}
+          </div>
+          <div class="preview-info">
+            <span class="preview-name">{{ u.prenom }} {{ u.nom }}</span>
+            <span class="preview-role">{{ getRoleLabel(u.role) }}</span>
+          </div>
+        </div>
+        <div class="preview-statut-change">
+          <span class="preview-from">
+            <span class="statut-badge badge-active">
+              <span class="statut-icon">✓</span> Actif
+            </span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+          <span class="preview-to">
+            <span class="statut-badge" [ngClass]="getStatutClass(newStatut())">
+              <span class="statut-icon">{{ getStatutIcon(newStatut()) }}</span>
+              {{ getStatutLabel(newStatut()) }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <label class="modal-label">
+        Raison <span class="required">*</span>
+        <span class="label-hint">(sera incluse dans l'email)</span>
+      </label>
+      <textarea
+        class="modal-textarea"
+        [(ngModel)]="raisonText"
+        rows="3"
+        maxlength="500"
+        [placeholder]="newStatut() === 'suspendu'
+          ? 'Ex : Comportement inapproprié, violation des conditions d\'utilisation…'
+          : 'Ex : Spam répété, activités frauduleuses…'"
+      ></textarea>
+
+      <div class="modal-error" *ngIf="statutError()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+        {{ statutError() }}
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn btn-cancel" (click)="closeStatutModal()">Annuler</button>
+      <button
+        class="modal-btn"
+        [ngClass]="newStatut() === 'suspendu' ? 'btn-confirm-suspend' : 'btn-confirm-ban'"
+        (click)="confirmStatutChange()"
+        [disabled]="statutLoading()"
+      >
+        <span *ngIf="!statutLoading()">
+          {{ newStatut() === 'suspendu' ? 'Confirmer la suspension' : 'Confirmer le bannissement' }}
+        </span>
+        <span class="spinner-sm" *ngIf="statutLoading()"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL DÉTAIL UTILISATEUR
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="detailUser()" (click)="closeDetail()">
+  <div class="modal-content modal-detail" (click)="$event.stopPropagation()">
+
+    <button class="modal-close" (click)="closeDetail()" aria-label="Fermer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+
+    <div class="detail-header" *ngIf="detailUser() as u">
+      <div class="detail-avatar" [ngClass]="getRoleClass(u.role)">
+        {{ getInitials(u.prenom, u.nom) }}
+      </div>
+      <div class="detail-title">
+        <h3>{{ u.prenom }} {{ u.nom }}</h3>
+        <span class="role-badge" [ngClass]="getRoleClass(u.role)">
+          {{ getRoleLabel(u.role) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-body" *ngIf="detailUser() as u">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">
+            <a [href]="'mailto:' + u.email" class="detail-link">{{ u.email }}</a>
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Fonction</span>
+          <span class="detail-value">{{ u.fonction || '—' }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Statut</span>
+          <span class="detail-value">
+            <span class="statut-badge" [ngClass]="getStatutClass(u.statut)">
+              <span class="statut-icon">{{ getStatutIcon(u.statut) }}</span>
+              {{ getStatutLabel(u.statut) }}
+            </span>
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Niveau d'accès</span>
+          <span class="detail-value">{{ u.niveau_acces }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Date d'inscription</span>
+          <span class="detail-value">{{ formatDateTime(u.date_inscription) }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Compte actif</span>
+          <span class="detail-value">
+            <span class="active-indicator" [class.active]="u.is_active">
+              {{ u.is_active ? 'Oui' : 'Non' }}
+            </span>
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Redirection</span>
+          <span class="detail-value mono">{{ u.redirect_to || '—' }}</span>
+        </div>
+      </div>
+
+      <!-- Actions rapides depuis le détail -->
+      <div class="detail-actions">
+        <ng-container *ngIf="u.statut === 'actif'">
+          <button
+            class="action-btn btn-suspend"
+            (click)="closeDetail(); openStatutModal(u, 'suspendu')"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16" />
+              <rect x="14" y="4" width="4" height="16" />
+            </svg>
+            Suspendre
+          </button>
+          <button
+            class="action-btn btn-ban"
+            (click)="closeDetail(); openStatutModal(u, 'banni')"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+            Bannir
+          </button>
+        </ng-container>
+        <ng-container *ngIf="u.statut !== 'actif'">
+          <button
+            class="action-btn btn-activate"
+            (click)="quickActivate(u); closeDetail()"
+            [disabled]="isProcessing(u.id)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Réactiver
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+══════════════════════════════════════════════════════════ -->
+<div class="toast-container" *ngIf="toast() as t">
+  <div class="toast" [ngClass]="'toast-' + t.type">
+    <svg *ngIf="t.type === 'success'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    <svg *ngIf="t.type === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+    <span>{{ t.message }}</span>
+  </div>
+</div>

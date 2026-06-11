@@ -1,0 +1,236 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <h2 class="modal-title">{{ establishment?.nom }}</h2>
+        <span class="modal-badge" *ngIf="establishment?.categorie">{{ establishment.categorie }}</span>
+      </div>
+      <button class="btn-close" (click)="close()" aria-label="Fermer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="modal-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'details'" (click)="setTab('details')">
+        Détails
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'comments'" (click)="setTab('comments')">
+        Avis
+        <span class="tab-count" *ngIf="rating()?.total_commentaires">
+          {{ rating()?.total_commentaires }}
+        </span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- ===== TAB DETAILS ===== -->
+      <div *ngIf="activeTab === 'details'" class="tab-content">
+
+        <!-- Image -->
+        <div class="detail-image" *ngIf="establishment?.photo">
+          <img [src]="establishment.photo" [alt]="establishment.nom" />
+        </div>
+
+        <!-- Rating summary -->
+        <div class="rating-summary" *ngIf="rating()">
+          <div class="rating-score">
+            <span class="score-value">{{ rating()?.note_moyenne || 0 }}</span>
+            <div class="score-stars">
+              <span *ngFor="let s of getStarArray()"
+                    class="star"
+                    [class.filled]="s <= (rating()?.note_moyenne || 0)">★</span>
+            </div>
+            <span class="score-count">{{ rating()?.total_commentaires }} avis</span>
+          </div>
+        </div>
+
+        <!-- Info fields -->
+        <div class="detail-grid">
+          <div class="detail-item" *ngIf="establishment?.adresse">
+            <span class="detail-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              Adresse
+            </span>
+            <span class="detail-value">{{ establishment.adresse }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="establishment?.telephone">
+            <span class="detail-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.42C1.6 2.3 2.43 1.4 3.55 1.4h3a2 2 0 0 1 2 1.72c.13 1 .4 1.97.74 2.9a2 2 0 0 1-.45 2.11L7.91 9.1a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.93.34 1.9.61 2.9.74A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              Téléphone
+            </span>
+            <span class="detail-value">{{ establishment.telephone }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="establishment?.email">
+            <span class="detail-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              Email
+            </span>
+            <span class="detail-value">{{ establishment.email }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="establishment?.ville">
+            <span class="detail-label">Ville</span>
+            <span class="detail-value">{{ establishment.ville }}</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-description" *ngIf="establishment?.description">
+          <p>{{ establishment.description }}</p>
+        </div>
+
+      </div>
+
+      <!-- ===== TAB COMMENTS ===== -->
+      <div *ngIf="activeTab === 'comments'" class="tab-content">
+
+        <!-- Rating banner -->
+        <div class="comments-rating-bar" *ngIf="rating() && (rating()?.total_commentaires ?? 0) > 0">
+          <span class="big-score">{{ rating()?.note_moyenne }}</span>
+          <div>
+            <div class="stars-row">
+              <span *ngFor="let s of getStarArray()" class="star" [class.filled]="s <= (rating()?.note_moyenne || 0)">★</span>
+            </div>
+            <span class="comments-count">Basé sur {{ rating()?.total_commentaires }} avis</span>
+          </div>
+        </div>
+
+        <!-- Add comment form -->
+        <div class="comment-form-section">
+          <h3 class="section-title">Laisser un avis</h3>
+
+          <div *ngIf="successMessage()" class="alert alert-success">
+            {{ successMessage() }}
+          </div>
+          <div *ngIf="errorMessage()" class="alert alert-error">
+            {{ errorMessage() }}
+          </div>
+
+          <div class="star-picker">
+            <span class="star-picker-label">Note :</span>
+            <span *ngFor="let s of getStarArray()"
+                  class="star-pick"
+                  [class.active]="s <= newCommentNote"
+                  [class.hovered]="s <= hoveredStar"
+                  (mouseenter)="hoveredStar = s"
+                  (mouseleave)="hoveredStar = 0"
+                  (click)="newCommentNote = s">★</span>
+            <span class="star-label">{{ newCommentNote }}/5</span>
+          </div>
+
+          <textarea
+            class="comment-textarea"
+            [(ngModel)]="newCommentContenu"
+            rows="4"
+            placeholder="Partagez votre expérience avec cet établissement..."
+            maxlength="1000">
+          </textarea>
+
+          <button
+            class="btn-submit"
+            (click)="submitComment()"
+            [disabled]="isSubmitting() || !newCommentContenu.trim()">
+            <span *ngIf="!isSubmitting()">Publier l'avis</span>
+            <span *ngIf="isSubmitting()">Envoi en cours...</span>
+          </button>
+        </div>
+
+        <!-- Comments list -->
+        <div class="comments-list">
+          <div *ngIf="isLoadingComments()" class="loading-state">
+            <div class="spinner"></div>
+            <span>Chargement des avis...</span>
+          </div>
+
+          <div *ngIf="!isLoadingComments() && comments().length === 0" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p>Aucun avis pour le moment. Soyez le premier !</p>
+          </div>
+
+          <div *ngFor="let comment of comments()" class="comment-card">
+
+            <!-- Editing mode -->
+            <div *ngIf="editingComment?.id === comment.id" class="comment-edit-form">
+              <div class="star-picker">
+                <span *ngFor="let s of getStarArray()"
+                      class="star-pick"
+                      [class.active]="s <= editNote"
+                      (click)="editNote = s">★</span>
+              </div>
+              <textarea class="comment-textarea" [(ngModel)]="editContenu" rows="3"></textarea>
+              <div class="edit-actions">
+                <button class="btn-save" (click)="saveEdit()">Sauvegarder</button>
+                <button class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              </div>
+            </div>
+
+            <!-- Display mode -->
+            <div *ngIf="editingComment?.id !== comment.id">
+              <div class="comment-header">
+                <div class="comment-author">
+                  <div class="author-avatar">{{ comment.auteur_nom?.charAt(0)?.toUpperCase() || '?' }}</div>
+                  <div>
+                    <span class="author-name">{{ comment.auteur_nom }}</span>
+                    <span class="comment-date">{{ comment.date_publication | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+                <div class="comment-meta">
+                  <div class="comment-stars">
+                    <span *ngFor="let s of getStarArray()" class="star sm" [class.filled]="s <= comment.note">★</span>
+                  </div>
+                  <span class="status-badge" [ngClass]="getStatusClass(comment.statut)">
+                    {{ getStatusLabel(comment.statut) }}
+                  </span>
+                </div>
+              </div>
+
+              <p class="comment-body">{{ comment.contenu }}</p>
+
+              <div class="comment-footer" *ngIf="comment.motif_rejet">
+                <span class="reject-reason">Motif de rejet : {{ comment.motif_rejet }}</span>
+              </div>
+
+              <div class="comment-actions">
+                <button class="btn-icon edit-btn" (click)="startEdit(comment)" title="Modifier">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Modifier
+                </button>
+                <button class="btn-icon delete-btn" (click)="deleteComment(comment)" title="Supprimer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                  </svg>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

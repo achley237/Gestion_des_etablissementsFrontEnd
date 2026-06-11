@@ -1,0 +1,277 @@
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — Modération des Commentaires
+══════════════════════════════════════════════════════════ -->
+
+<div class="admin-container">
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <div class="admin-header">
+        <div class="admin-header-left">
+            <a routerLink="/admin" class="admin-back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Retour dashboard
+            </a>
+            <h1 class="admin-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B" stroke-width="2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                Modération des avis
+            </h1>
+        </div>
+        <button class="admin-refresh-btn" (click)="loadComments()" [disabled]="isLoading()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+            </svg>
+            Actualiser
+        </button>
+    </div>
+
+    <!-- ── STATS CARDS ────────────────────────────────────────── -->
+    <div class="admin-stats-row">
+        <div class="admin-stat-card stat-total">
+            <span class="stat-number">{{ allComments().length }}</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="admin-stat-card stat-waiting">
+            <span class="stat-number">{{ pendingCount() }}</span>
+            <span class="stat-label">En attente</span>
+        </div>
+        <div class="admin-stat-card stat-approved">
+            <span class="stat-number">{{ approvedCount() }}</span>
+            <span class="stat-label">Approuvés</span>
+        </div>
+        <div class="admin-stat-card stat-rejected">
+            <span class="stat-number">{{ rejectedCount() }}</span>
+            <span class="stat-label">Rejetés</span>
+        </div>
+    </div>
+
+    <!-- ── FILTRES ────────────────────────────────────────────── -->
+    <div class="admin-filters">
+        <div class="filter-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Rechercher par auteur, établissement ou contenu…" class="filter-search-input" />
+        </div>
+
+        <div class="filter-pills">
+            <button class="filter-pill" [class.active]="filterStatut() === ''"
+                (click)="filterStatut.set(''); onFilterChange()">
+                Tous
+            </button>
+            <button class="filter-pill pill-waiting" [class.active]="filterStatut() === 'en_attente'"
+                (click)="filterStatut.set('en_attente'); onFilterChange()">
+                ⏳ En attente
+                <span class="pill-count">{{ pendingCount() }}</span>
+            </button>
+            <button class="filter-pill pill-approved" [class.active]="filterStatut() === 'approuve'"
+                (click)="filterStatut.set('approuve'); onFilterChange()">
+                ✓ Approuvés
+            </button>
+            <button class="filter-pill pill-rejected" [class.active]="filterStatut() === 'rejete'"
+                (click)="filterStatut.set('rejete'); onFilterChange()">
+                ✗ Rejetés
+            </button>
+        </div>
+    </div>
+
+    <!-- ── LISTE ──────────────────────────────────────────────── -->
+    <div class="admin-list">
+
+        <!-- Skeleton -->
+        <div *ngIf="isLoading()" class="skeleton-list">
+            <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5]"></div>
+        </div>
+
+        <!-- Liste réelle -->
+        <ng-container *ngIf="!isLoading()">
+
+            <div class="comment-card" *ngFor="let c of filteredComments()" [class.processing]="isProcessing(c.id)">
+                <!-- Header -->
+                <div class="comment-card-header">
+                    <div class="comment-author-info">
+                        <div class="comment-avatar">{{ getInitials(c.auteur_nom) }}</div>
+                        <div class="comment-author-meta">
+                            <span class="comment-author-name">{{ c.auteur_nom }}</span>
+                            <span class="comment-author-email">{{ c.auteur_email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="comment-card-right">
+                        <span class="statut-badge" [ngClass]="getStatutClass(c.statut)">
+                            {{ getStatutLabel(c.statut) }}
+                        </span>
+                        <span class="comment-date">{{ formatDate(c.date_publication) }}</span>
+                    </div>
+                </div>
+
+                <!-- Établissement -->
+                <div class="comment-etab">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span>{{ c.etablissement_nom }}</span>
+                </div>
+
+                <!-- Note -->
+                <div class="comment-rating">
+                    <div class="comment-stars">
+                        <svg *ngFor="let s of getStarsArray(c.note)" width="14" height="14" viewBox="0 0 24 24"
+                            [attr.fill]="s <= c.note ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'" stroke-width="1.8">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </div>
+                    <span class="comment-note-num">{{ c.note }}/5</span>
+                </div>
+
+                <!-- Contenu -->
+                <p class="comment-content">{{ c.contenu }}</p>
+
+                <!-- Motif de rejet -->
+                <div class="comment-reject-reason" *ngIf="c.statut === 'rejete' && c.motif_rejet">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    <span>Motif : {{ c.motif_rejet }}</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="comment-actions">
+                    <button *ngIf="c.statut !== 'approuve'" class="action-btn btn-approve" (click)="approve(c)"
+                        [disabled]="isProcessing(c.id)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        {{ isProcessing(c.id) ? '...' : 'Approuver' }}
+                    </button>
+
+                    <button *ngIf="c.statut !== 'rejete'" class="action-btn btn-reject" (click)="openRejectModal(c)"
+                        [disabled]="isProcessing(c.id)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                        Rejeter
+                    </button>
+
+                    <button class="action-btn btn-delete" (click)="delete(c)" [disabled]="isProcessing(c.id)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                        </svg>
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+
+            <!-- État vide -->
+            <div class="empty-state" *ngIf="filteredComments().length === 0">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                <p>Aucun commentaire trouvé.</p>
+                <button class="empty-reset-btn" (click)="filterStatut.set(''); searchQuery.set(''); onFilterChange()">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+
+        </ng-container>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL REJET
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="rejectModalComment()" (click)="closeRejectModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <button class="modal-close" (click)="closeRejectModal()" aria-label="Fermer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+
+        <div class="modal-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            <h3>Rejeter cet avis</h3>
+        </div>
+
+        <div class="modal-body" *ngIf="rejectModalComment() as c">
+            <p class="modal-info">
+                Vous êtes sur le point de rejeter l'avis de <strong>{{ c.auteur_nom }}</strong>
+                pour l'établissement <strong>{{ c.etablissement_nom }}</strong>.
+            </p>
+
+            <div class="modal-preview">
+                <div class="preview-stars">
+                    <svg *ngFor="let s of getStarsArray(c.note)" width="12" height="12" viewBox="0 0 24 24"
+                        [attr.fill]="s <= c.note ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'" stroke-width="1.8">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                </div>
+                <p class="preview-text">{{ c.contenu }}</p>
+            </div>
+
+            <label class="modal-label">Motif du rejet <span class="required">*</span></label>
+            <textarea class="modal-textarea" [(ngModel)]="rejectMotif" rows="3" maxlength="500"
+                placeholder="Expliquez pourquoi cet avis est rejeté (spam, injures, hors-sujet…)…"></textarea>
+
+            <div class="modal-error" *ngIf="rejectError()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+                {{ rejectError() }}
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-btn btn-cancel" (click)="closeRejectModal()">Annuler</button>
+            <button class="modal-btn btn-confirm-reject" (click)="confirmReject()" [disabled]="rejectLoading()">
+                <span *ngIf="!rejectLoading()">Confirmer le rejet</span>
+                <span class="spinner-sm" *ngIf="rejectLoading()"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+══════════════════════════════════════════════════════════ -->
+<div class="toast-container" *ngIf="toast() as t">
+    <div class="toast" [ngClass]="'toast-' + t.type">
+        <svg *ngIf="t.type === 'success'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <svg *ngIf="t.type === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+        <span>{{ t.message }}</span>
+    </div>
+</div>

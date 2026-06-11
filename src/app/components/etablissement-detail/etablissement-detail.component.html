@@ -1,0 +1,265 @@
+<div class="det-root">
+
+  <!-- ── Hero ──────────────────────────────────────── -->
+  <div class="det-top">
+    <button class="det-back" (click)="goBack()">
+      <i class="ti ti-arrow-left"></i> Retour
+    </button>
+    <div class="det-hero">
+      <div class="det-av">{{ getInitials(etablissement()?.nom || '') }}</div>
+      <div class="det-hb">
+        <p class="det-kicker">Fiche établissement</p>
+        <h1 class="det-title">{{ etablissement()?.nom }}</h1>
+        <div class="det-pills">
+          <span class="det-pill det-pill--type">
+            <i class="ti ti-school"></i>
+            {{ etablissement()?.type | titlecase }}
+          </span>
+          <span class="det-pill" [ngClass]="getStatusPillClass(etablissement()?.statut || '')">
+            <i [class]="'ti ti-' + getStatusTiIcon(etablissement()?.statut || '')"></i>
+            {{ getStatusLabel(etablissement()?.statut || '') }}
+          </span>
+          @if (etablissement()?.region) {
+            <span class="det-pill det-pill--type">
+              <i class="ti ti-map-pin"></i>
+              {{ etablissement()!.region }}
+            </span>
+          }
+        </div>
+      </div>
+      @if (isDirecteur()) {
+        <button class="det-edit" (click)="onEdit()">
+          <i class="ti ti-pencil"></i> Modifier
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── Body ──────────────────────────────────────── -->
+  <div class="det-body">
+
+    @if (isLoading()) {
+      <div class="det-state">
+        <div class="det-spinner"></div>
+        <p>Chargement…</p>
+      </div>
+
+    } @else if (errorMessage()) {
+      <div class="det-state">
+        <i class="ti ti-alert-circle det-err-ico"></i>
+        <p>{{ errorMessage() }}</p>
+        <button class="det-back-btn" (click)="goBack()">Retour</button>
+      </div>
+
+    } @else if (etablissement()) {
+
+      <!-- ── Grille infos ───────────────────────────── -->
+      <div class="det-grid">
+
+        <!-- Colonne gauche -->
+        <div class="det-col">
+
+          <div class="det-card">
+            <div class="det-ch">
+              <div class="det-ci det-ci--blue"><i class="ti ti-building-community"></i></div>
+              <span class="det-ct">Informations générales</span>
+            </div>
+            <div class="det-cb">
+              <div class="det-ig">
+                <div class="det-ii">
+                  <label>Nom</label>
+                  <span>{{ etablissement()!.nom }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Type</label>
+                  <span><i class="ti ti-school det-inline-ico"></i>{{ etablissement()!.type | titlecase }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Ville</label>
+                  <span><i class="ti ti-map-pin det-inline-ico"></i>{{ etablissement()!.ville }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Région</label>
+                  <span>{{ etablissement()!.region || '—' }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Pays</label>
+                  <span><i class="ti ti-world det-inline-ico"></i>{{ etablissement()!.pays || '—' }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Fondé en</label>
+                  <span><i class="ti ti-calendar det-inline-ico"></i>{{ etablissement()!.annee_creation || '—' }}</span>
+                </div>
+                <div class="det-ii">
+                  <label>Capacité</label>
+                  <span>
+                    <i class="ti ti-users det-inline-ico"></i>
+                    {{ etablissement()!.capacite ? (etablissement()!.capacite | number) + ' élèves' : '—' }}
+                  </span>
+                </div>
+                @if (etablissement()!.adresse) {
+                  <div class="det-ii">
+                    <label>Adresse</label>
+                    <span>{{ etablissement()!.adresse }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (etablissement()!.niveaux_scolaires?.length) {
+                <div class="det-div"></div>
+                <div class="det-ii">
+                  <label>Niveaux scolaires</label>
+                  <div class="det-tl">
+                    @for (n of etablissement()!.niveaux_scolaires; track n) {
+                      <span class="det-tag">{{ n }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="det-card">
+            <div class="det-ch">
+              <div class="det-ci det-ci--teal"><i class="ti ti-phone"></i></div>
+              <span class="det-ct">Contacts & présence en ligne</span>
+            </div>
+            <div class="det-cbs">
+              @if (etablissement()!.email) {
+                <div class="det-cr">
+                  <div class="det-cico det-ci--teal"><i class="ti ti-mail"></i></div>
+                  <div>
+                    <div class="det-cl">Email</div>
+                    <div class="det-cv">{{ etablissement()!.email }}</div>
+                  </div>
+                </div>
+              }
+              @if (etablissement()!.telephone) {
+                <div class="det-cr">
+                  <div class="det-cico det-ci--amber"><i class="ti ti-device-mobile"></i></div>
+                  <div>
+                    <div class="det-cl">Téléphone</div>
+                    <div class="det-cv">{{ etablissement()!.telephone }}</div>
+                  </div>
+                </div>
+              }
+              @if (etablissement()!.site_web) {
+                <div class="det-cr">
+                  <div class="det-cico det-ci--purple"><i class="ti ti-world-www"></i></div>
+                  <div>
+                    <div class="det-cl">Site web</div>
+                    <a class="det-link" [href]="etablissement()!.site_web" target="_blank">
+                      {{ etablissement()!.site_web }}
+                    </a>
+                  </div>
+                </div>
+              }
+              <div class="det-cr">
+                <div class="det-cico det-ci--red"><i class="ti ti-map-pin"></i></div>
+                <div>
+                  <div class="det-cl">Localisation</div>
+                  <div class="det-cv">
+                    {{ etablissement()!.ville }}
+                    @if (etablissement()!.region) { , {{ etablissement()!.region }} }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          @if (etablissement()!.statut === 'rejete' && etablissement()!.motif_rejet) {
+            <div class="det-card det-card--danger">
+              <div class="det-ch">
+                <div class="det-ci det-ci--red"><i class="ti ti-message-report"></i></div>
+                <span class="det-ct">Motif du rejet</span>
+              </div>
+              <div class="det-cb">
+                <div class="det-rj"><p>{{ etablissement()!.motif_rejet }}</p></div>
+              </div>
+            </div>
+          }
+
+        </div>
+
+        <!-- Colonne droite -->
+        <div class="det-col">
+
+          <div class="det-card">
+            <div class="det-ch">
+              <div class="det-ci det-ci--green"><i class="ti ti-chart-bar"></i></div>
+              <span class="det-ct">Chiffres clés</span>
+            </div>
+            <div class="det-cb">
+              <div class="det-sr">
+                <div class="det-sb">
+                  <div class="det-sv">{{ etablissement()!.capacite || '—' }}</div>
+                  <div class="det-sl"><i class="ti ti-users"></i> Capacité</div>
+                </div>
+                <div class="det-sb">
+                  <div class="det-sv">{{ etablissement()!.annee_creation || '—' }}</div>
+                  <div class="det-sl"><i class="ti ti-calendar"></i> Fondation</div>
+                </div>
+              </div>
+              @if (etablissement()!.niveaux_scolaires?.length) {
+                <div class="det-sb det-sb--full">
+                  <div class="det-sv" style="font-size:16px">
+                    {{ etablissement()!.niveaux_scolaires!.length }} niveaux
+                  </div>
+                  <div class="det-sl"><i class="ti ti-stairs-up"></i> Niveaux couverts</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="det-card">
+            <div class="det-ch">
+              <div class="det-ci det-ci--green"><i class="ti ti-shield-check"></i></div>
+              <span class="det-ct">Validation</span>
+            </div>
+            <div class="det-cb">
+              <div class="det-stb" [ngClass]="'det-stb--' + etablissement()!.statut">
+                <i [class]="'ti ti-' + getStatusTiIcon(etablissement()!.statut)"></i>
+                <div>
+                  <div class="det-stl">{{ getStatusLabel(etablissement()!.statut) }}</div>
+                  <div class="det-sts">{{ getStatusDescription(etablissement()!.statut) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="det-card">
+            <div class="det-ch">
+              <div class="det-ci det-ci--amber"><i class="ti ti-info-circle"></i></div>
+              <span class="det-ct">Métadonnées</span>
+            </div>
+            <div class="det-cbs">
+              <div class="det-cr">
+                <div class="det-cico det-ci--amber"><i class="ti ti-calendar-plus"></i></div>
+                <div>
+                  <div class="det-cl">Date de création</div>
+                  <div class="det-cv">{{ getFormattedDate(etablissement()!.date_creation) }}</div>
+                </div>
+              </div>
+              <div class="det-cr">
+                <div class="det-cico det-ci--blue"><i class="ti ti-refresh"></i></div>
+                <div>
+                  <div class="det-cl">Dernière mise à jour</div>
+                  <div class="det-cv">{{ getFormattedDate(etablissement()!.date_mise_a_jour) }}</div>
+                </div>
+              </div>
+              <div class="det-cr">
+                <div class="det-cico det-ci--purple"><i class="ti ti-id"></i></div>
+                <div>
+                  <div class="det-cl">ID système</div>
+                  <div class="det-cv">#{{ etablissement()!.id }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    }
+  </div>
+</div>

@@ -1,119 +1,251 @@
 <div class="school-register-layout">
   <div class="glass-card">
 
+    <!-- ── Header Dynamique ────────────────────────── -->
     <div class="header-section">
       <div class="icon-title-row">
-        <span class="material-symbols-outlined header-icon">domain_add</span>
-        <h2 class="card-title">Ajouter un Établissement</h2>
+        <span class="material-symbols-outlined header-icon">
+          {{ isEditMode() ? 'edit_note' : 'domain_add' }}
+        </span>
+        <h2 class="card-title">
+          {{ isEditMode() ? 'Modifier l\'Établissement' : 'Ajouter un Établissement' }}
+        </h2>
       </div>
-      <p class="card-subtitle">Enregistrez un nouvel établissement dans le système centralisé.</p>
+      <p class="card-subtitle">
+        {{ isEditMode() 
+            ? 'Modifiez les informations de la structure enregistrée.' 
+            : 'Enregistrez un nouvel établissement dans le système centralisé.' }}
+      </p>
     </div>
 
+    <!-- ── État non autorisé ───────────────────────── -->
     @if (!isAuthorized()) {
-    <div class="unauthorized-state">
-      <span class="material-symbols-outlined alert-big-icon">gpp_bad</span>
-      <h3>Accès Restreint</h3>
-      <p>{{ errorMessage() }}</p>
-      <button class="back-btn" (click)="cancel()">Retour au tableau de bord</button>
-    </div>
-    } @else {
-
-    @if (errorMessage()) {
-    <div class="banner error-banner">
-      <span class="material-symbols-outlined">error</span>
-      <span>{{ errorMessage() }}</span>
-    </div>
-    }
-    @if (successMessage()) {
-    <div class="banner success-banner">
-      <span class="material-symbols-outlined">check_circle</span>
-      <span>{{ successMessage() }}</span>
-    </div>
-    }
-
-    <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="compact-form">
-
-      <div class="form-row grid-8-4">
-        <div class="form-group">
-          <label for="nom">Nom de l'établissement</label>
-          <input type="text" id="nom" formControlName="nom" placeholder="Ex: Complexe Académique" />
-        </div>
-        <div class="form-group">
-          <label for="type">Type</label>
-          <select id="type" formControlName="type">
-            <option value="primaire">Primaire</option>
-            <option value="secondaire">Secondaire</option>
-            <option value="universite">Supérieur</option>
-          </select>
-        </div>
+      <div class="unauthorized-state">
+        <span class="material-symbols-outlined alert-big-icon">gpp_bad</span>
+        <h3>Accès Restreint</h3>
+        <p>{{ errorMessage() }}</p>
+        <button class="back-btn" (click)="cancel()">Retour au tableau de bord</button>
       </div>
-
-      <div class="form-row grid-4-4-4">
-        <div class="form-group">
-          <label for="ville">Ville</label>
-          <input type="text" id="ville" formControlName="ville" placeholder="Ex: Yaoundé" />
-        </div>
-        <div class="form-group">
-          <label for="region">Région</label>
-          <input type="text" id="region" formControlName="region" placeholder="Ex: Centre" />
-        </div>
-        <div class="form-group">
-          <label for="pays">Pays</label>
-          <input type="text" id="pays" formControlName="pays" placeholder="Ex: Cameroun" />
-        </div>
+    } 
+    <!-- ── État chargement des données (mode édition) ─ -->
+    @else if (isLoading() && isEditMode()) {
+      <div class="unauthorized-state">
+        <div class="c237-spinner" style="margin: 0 auto 16px auto;"></div>
+        <h3>Chargement des données…</h3>
+        <p>Récupération des informations de l'établissement.</p>
       </div>
+    } 
+    @else {
 
-      <div class="form-group">
-        <label for="adresse">Adresse géographique</label>
-        <input type="text" id="adresse" formControlName="adresse" placeholder="Ex: Rue 1024, Bastos" />
-      </div>
-
-      <div class="form-row grid-6-6">
-        <div class="form-group">
-          <label for="telephone">Téléphone</label>
-          <input type="text" id="telephone" formControlName="telephone" placeholder="Ex: +237 6xx xxx xxx" />
-        </div>
-        <div class="form-group">
-          <label for="email">Email de contact</label>
-          <input type="email" id="email" formControlName="email" placeholder="contact@ecole.com" />
-        </div>
-      </div>
-
-      <div class="form-row grid-6-6">
-        <div class="form-group">
-          <label for="site_web">Site Web</label>
-          <input type="text" id="site_web" formControlName="site_web" placeholder="www.ecole.com" />
-        </div>
-        <div class="form-group">
-          <label for="niveaux_scolaires">Niveaux scolaires</label>
-          <input type="text" id="niveaux_scolaires" formControlName="niveaux_scolaires"
-            placeholder="Ex: SIL au CM2, 6e à Tle" />
-        </div>
-      </div>
-
-      <div class="form-row grid-6-6">
-        <div class="form-group">
-          <label for="capacite">Capacité maximale</label>
-          <input type="number" id="capacite" formControlName="capacite" placeholder="Ex: 1200" />
-        </div>
-        <div class="form-group">
-          <label for="annee_creation">Année de création</label>
-          <input type="number" id="annee_creation" formControlName="annee_creation" placeholder="Ex: 2015" />
-        </div>
-      </div>
-
-      <div class="action-buttons">
-        <button type="button" class="cancel-btn" (click)="cancel()" [disabled]="isLoading()">Annuler</button>
-        <button type="submit" class="submit-btn" [disabled]="isLoading() || schoolForm.invalid">
-          @if (isLoading()) {
-          <span class="spinner"></span>
-          } @else {
-          <span class="material-symbols-outlined">save</span> Enregistrer l'établissement
+      <!-- ── Barre de progression ──────────────────── -->
+      <div class="progress-container">
+        <div class="progress-steps">
+          @for (step of steps; track step.id; let i = $index) {
+            <div class="step-item" [class.active]="currentStep() === i" [class.completed]="currentStep() > i">
+              <div class="step-circle">
+                @if (currentStep() > i) {
+                  <span class="material-symbols-outlined">check</span>
+                } @else {
+                  <span>{{ i + 1 }}</span>
+                }
+              </div>
+              <span class="step-label">{{ step.label }}</span>
+              @if (i < steps.length - 1) {
+                <div class="step-line" [class.active]="currentStep() > i"></div>
+              }
+            </div>
           }
-        </button>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgress()"></div>
+        </div>
       </div>
 
-    </form>
+      <!-- ── Bannières d'alerte ────────────────────── -->
+      @if (errorMessage()) {
+        <div class="banner error-banner">
+          <span class="material-symbols-outlined">error</span>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+      @if (successMessage()) {
+        <div class="banner success-banner">
+          <span class="material-symbols-outlined">check_circle</span>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <!-- ── Formulaire ────────────────────────────── -->
+      <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="compact-form">
+
+        <!-- ═══ ÉTAPE 1 : Informations Générales ═══ -->
+        @if (currentStep() === 0) {
+          <div class="step-content">
+            <h3 class="step-title">
+              <span class="material-symbols-outlined">info</span>
+              Informations Générales
+            </h3>
+
+            <div class="form-row grid-8-4">
+              <div class="form-group">
+                <label for="nom">Nom de l'établissement *</label>
+                <input type="text" id="nom" formControlName="nom" placeholder="Ex: Complexe Académique" />
+                @if (schoolForm.get('nom')?.invalid && schoolForm.get('nom')?.touched) {
+                  <span class="field-error">Ce champ est requis</span>
+                }
+              </div>
+              <div class="form-group">
+                <label for="type">Type *</label>
+                <select id="type" formControlName="type">
+                  <option value="primaire">Primaire</option>
+                  <option value="secondaire">Secondaire</option>
+                  <option value="universite">Supérieur</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row grid-4-4-4">
+              <div class="form-group">
+                <label for="ville">Ville *</label>
+                <input type="text" id="ville" formControlName="ville" placeholder="Ex: Yaoundé" />
+              </div>
+              <div class="form-group">
+                <label for="region">Région *</label>
+                <input type="text" id="region" formControlName="region" placeholder="Ex: Centre" />
+              </div>
+              <div class="form-group">
+                <label for="pays">Pays *</label>
+                <input type="text" id="pays" formControlName="pays" placeholder="Ex: Cameroun" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="adresse">Adresse géographique *</label>
+              <input type="text" id="adresse" formControlName="adresse" placeholder="Ex: Rue 1024, Bastos" />
+            </div>
+          </div>
+        }
+
+        <!-- ═══ ÉTAPE 2 : Contact & Web ═══ -->
+        @if (currentStep() === 1) {
+          <div class="step-content">
+            <h3 class="step-title">
+              <span class="material-symbols-outlined">contact_phone</span>
+              Contact & Web
+            </h3>
+
+            <div class="form-row grid-6-6">
+              <div class="form-group">
+                <label for="telephone">Téléphone *</label>
+                <input type="text" id="telephone" formControlName="telephone" placeholder="Ex: +237 6xx xxx xxx" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email de contact *</label>
+                <input type="email" id="email" formControlName="email" placeholder="contact@ecole.com" />
+                @if (schoolForm.get('email')?.hasError('email') && schoolForm.get('email')?.touched) {
+                  <span class="field-error">Email invalide</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-row grid-6-6">
+              <div class="form-group">
+                <label for="site_web">Site Web *</label>
+                <input type="text" id="site_web" formControlName="site_web" placeholder="www.ecole.com" />
+              </div>
+              <div class="form-group">
+                <label for="niveaux_scolaires">Niveaux scolaires *</label>
+                <input type="text" id="niveaux_scolaires" formControlName="niveaux_scolaires"
+                  placeholder="Ex: SIL au CM2, 6e à Tle" />
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ═══ ÉTAPE 3 : Détails & Récapitulatif ═══ -->
+        @if (currentStep() === 2) {
+          <div class="step-content">
+            <h3 class="step-title">
+              <span class="material-symbols-outlined">summarize</span>
+              Détails & Récapitulatif
+            </h3>
+
+            <div class="form-row grid-6-6">
+              <div class="form-group">
+                <label for="capacite">Capacité maximale *</label>
+                <input type="number" id="capacite" formControlName="capacite" placeholder="Ex: 1200" />
+              </div>
+              <div class="form-group">
+                <label for="annee_creation">Année de création *</label>
+                <input type="number" id="annee_creation" formControlName="annee_creation" placeholder="Ex: 2015" />
+              </div>
+            </div>
+
+            <!-- Récapitulatif -->
+            <div class="recap-section">
+              <h4 class="recap-title">Récapitulatif</h4>
+              <div class="recap-grid">
+                <div class="recap-item">
+                  <span class="recap-label">Nom</span>
+                  <span class="recap-value">{{ schoolForm.get('nom')?.value || '-' }}</span>
+                </div>
+                <div class="recap-item">
+                  <span class="recap-label">Type</span>
+                  <span class="recap-value">{{ schoolForm.get('type')?.value || '-' }}</span>
+                </div>
+                <div class="recap-item">
+                  <span class="recap-label">Ville</span>
+                  <span class="recap-value">{{ schoolForm.get('ville')?.value || '-' }}</span>
+                </div>
+                <div class="recap-item">
+                  <span class="recap-label">Email</span>
+                  <span class="recap-value">{{ schoolForm.get('email')?.value || '-' }}</span>
+                </div>
+                <div class="recap-item">
+                  <span class="recap-label">Capacité</span>
+                  <span class="recap-value">{{ schoolForm.get('capacite')?.value || '-' }}</span>
+                </div>
+                <div class="recap-item">
+                  <span class="recap-label">Année création</span>
+                  <span class="recap-value">{{ schoolForm.get('annee_creation')?.value || '-' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Boutons de navigation ───────────────── -->
+        <div class="action-buttons">
+          @if (currentStep() > 0) {
+            <button type="button" class="cancel-btn" (click)="previousStep()" [disabled]="isLoading()">
+              <span class="material-symbols-outlined">arrow_back</span>
+              Précédent
+            </button>
+          }
+
+          <button type="button" class="cancel-btn" (click)="cancel()" [disabled]="isLoading()">
+            Annuler
+          </button>
+
+          @if (currentStep() < steps.length - 1) {
+            <button type="button" class="submit-btn" (click)="nextStep()">
+              Suivant
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          } @else {
+            <!-- ✅ BOUTON DE SOUMISSION DYNAMIQUE -->
+            <button type="submit" class="submit-btn" [disabled]="isLoading() || schoolForm.invalid">
+              @if (isLoading()) {
+                <span class="spinner"></span>
+              } @else {
+                <span class="material-symbols-outlined">save</span>
+                {{ isEditMode() ? 'Modifier l\'établissement' : 'Enregistrer l\'établissement' }}
+              }
+            </button>
+          }
+        </div>
+
+      </form>
     }
   </div>
 </div>

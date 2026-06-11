@@ -1,0 +1,643 @@
+<!-- ══════════════════════════════════════════════════════════
+     CAMPUS237 — Espace Étudiant (Version Premium)
+══════════════════════════════════════════════════════════ -->
+
+<!-- ── TOPBAR ─────────────────────────────────────────────── -->
+<header class="eu-topbar">
+    <a routerLink="/" class="eu-brand">
+        <img src="design/campus237logo.jpeg" alt="Campus237" class="eu-brand-logo" />
+        <span class="eu-brand-name">CAMPUS<strong>237</strong></span>
+    </a>
+
+    <nav class="eu-nav">
+        <a routerLink="/" class="eu-nav-link active">Accueil</a>
+        <a routerLink="/etablissements" class="eu-nav-link">Annuaire</a>
+    </nav>
+
+    <div class="eu-topbar-right">
+        <div class="eu-user-chip" *ngIf="userInfo">
+            <div class="eu-user-avatar">{{ getInitials(userInfo.firstName + ' ' + userInfo.lastName) }}</div>
+            <span class="eu-user-name">{{ userInfo.firstName }}</span>
+        </div>
+        <button class="eu-logout-btn" (click)="logout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Déconnexion
+        </button>
+    </div>
+</header>
+
+
+<!-- ── HERO ÉTUDIANT ──────────────────────────────────────── -->
+<section class="eu-hero">
+    <div class="eu-hero-glow eu-glow-1"></div>
+    <div class="eu-hero-glow eu-glow-2"></div>
+    <div class="eu-hero-glow eu-glow-3"></div>
+
+    <!-- Particules décoratives -->
+    <div class="eu-hero-particles">
+        <div class="eu-particle" *ngFor="let i of [1,2,3,4,5,6,7,8]"></div>
+    </div>
+
+    <div class="eu-hero-inner">
+        <div class="eu-welcome-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            <span>Espace Étudiant</span>
+        </div>
+
+        <h1 class="eu-hero-title">
+            Bonjour <span class="eu-name-accent">{{ userInfo?.firstName ?? 'Étudiant' }}</span> 👋
+        </h1>
+        <p class="eu-hero-sub">
+            Découvrez les meilleurs établissements notés par la communauté, consultez les avis et partagez votre
+            expérience.
+        </p>
+
+        <!-- Barre de recherche rapide -->
+        <div class="eu-search-bar">
+            <div class="eu-search-input-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                    placeholder="Rechercher un établissement ou une ville…" class="eu-search-input" />
+                <button class="eu-search-clear" *ngIf="searchQuery()" (click)="searchQuery.set('')" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="eu-search-filters">
+                <button *ngFor="let t of types" class="eu-filter-pill" [class.active]="filterType() === t.value"
+                    (click)="filterType.set(t.value)" type="button">
+                    {{ t.label }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats rapides -->
+        <div class="eu-hero-stats" *ngIf="!isLoading()">
+            <div class="eu-hero-stat">
+                <span class="eu-hero-stat-num">{{ allEtabs().length }}</span>
+                <span class="eu-hero-stat-label">Établissements</span>
+            </div>
+            <div class="eu-hero-stat-divider"></div>
+            <div class="eu-hero-stat">
+                <span class="eu-hero-stat-num">{{ totalAvisCount() }}</span>
+                <span class="eu-hero-stat-label">Avis vérifiés</span>
+            </div>
+            <div class="eu-hero-stat-divider"></div>
+            <div class="eu-hero-stat">
+                <span class="eu-hero-stat-num">{{ averageRating() }}</span>
+                <span class="eu-hero-stat-label">Note moyenne</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ── PODIUM TOP 3 ───────────────────────────────────────── -->
+<section class="eu-podium-section" *ngIf="!isLoading() && topTrois().length > 0">
+    <div class="eu-section-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#C8A84B">
+            <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+        Top 3 les mieux notés
+    </div>
+
+    <div class="eu-podium-grid">
+        <div class="eu-podium-card" *ngFor="let e of topTrois(); let i = index" [class.eu-podium-gold]="i === 0"
+            [class.eu-podium-silver]="i === 1" [class.eu-podium-bronze]="i === 2" (click)="openModal(e)">
+
+            <div class="eu-podium-rank">
+                <span class="eu-rank-number">{{ i + 1 }}</span>
+                <span class="eu-rank-medal" *ngIf="i === 0">🥇</span>
+                <span class="eu-rank-medal" *ngIf="i === 1">🥈</span>
+                <span class="eu-rank-medal" *ngIf="i === 2">🥉</span>
+            </div>
+
+            <div class="eu-podium-img-wrap">
+                <img [src]="getImage(e.type)" [alt]="e.nom" class="eu-podium-img" loading="lazy" />
+                <div class="eu-podium-img-overlay"></div>
+            </div>
+
+            <div class="eu-podium-body">
+                <span class="eu-podium-type" [style.background]="getTypeAccent(e.type)">{{ getTypeLabel(e.type)
+                    }}</span>
+                <h3 class="eu-podium-title">{{ e.nom }}</h3>
+                <p class="eu-podium-loc">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {{ e.ville }}
+                    <span *ngIf="e.region">, {{ e.region }}</span>
+                </p>
+
+                <div class="eu-podium-rating">
+                    <div class="eu-stars-row">
+                        <svg *ngFor="let s of starsArray" width="14" height="14" viewBox="0 0 24 24"
+                            [attr.fill]="s <= e.note_moyenne ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                            stroke-width="1.8">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </div>
+                    <span class="eu-rating-val">{{ e.note_moyenne > 0 ? e.note_moyenne.toFixed(1) : '—' }}</span>
+                    <span class="eu-rating-count">{{ e.total_commentaires }} avis</span>
+                </div>
+
+                <!-- Aperçu dernier commentaire -->
+                <div class="eu-podium-latest-review" *ngIf="getLatestComment(e.id) as latest">
+                    <div class="eu-podium-review-head">
+                        <div class="eu-podium-review-avatar">{{ getInitials(latest.auteur_nom) }}</div>
+                        <span class="eu-podium-review-author">{{ latest.auteur_nom }}</span>
+                    </div>
+                    <p class="eu-podium-review-text">"{{ latest.contenu | slice:0:80 }}{{ latest.contenu.length > 80 ?
+                        '…' : '' }}"</p>
+                </div>
+
+                <button class="eu-podium-btn" type="button">
+                    Voir les détails
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ── LISTE COMPLÈTE ─────────────────────────────────────── -->
+<section class="eu-list-section">
+    <div class="eu-list-header">
+        <div class="eu-section-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Tous les établissements
+        </div>
+        <span class="eu-result-count" *ngIf="!isLoading()">
+            {{ filteredEtabs().length }} résultat{{ filteredEtabs().length > 1 ? 's' : '' }}
+        </span>
+    </div>
+
+    <!-- Skeletons -->
+    <div class="eu-grid" *ngIf="isLoading()">
+        <div class="eu-skeleton" *ngFor="let i of [1,2,3,4,5,6,7,8]"></div>
+    </div>
+
+    <!-- Grille réelle -->
+    <div class="eu-grid" *ngIf="!isLoading()">
+        <article class="eu-card" *ngFor="let e of filteredEtabs(); let i = index" (click)="openModal(e)"
+            [style.animation-delay]="(i * 0.05) + 's'">
+
+            <div class="eu-card-img-wrap">
+                <img [src]="getImage(e.type)" [alt]="e.nom" class="eu-card-img" loading="lazy" />
+                <div class="eu-card-overlay"></div>
+                <span class="eu-card-type-badge" [style.background]="getTypeAccent(e.type)">
+                    {{ getTypeLabel(e.type) }}
+                </span>
+                <div class="eu-card-score">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="#C8A84B">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    <span>{{ e.note_moyenne > 0 ? e.note_moyenne.toFixed(1) : 'N/A' }}</span>
+                </div>
+            </div>
+
+            <div class="eu-card-body">
+                <h3 class="eu-card-title">{{ e.nom }}</h3>
+                <p class="eu-card-loc">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {{ e.ville }}<span *ngIf="e.region">, {{ e.region }}</span>
+                </p>
+
+                <div class="eu-card-meta">
+                    <div class="eu-mini-stars">
+                        <svg *ngFor="let s of starsArray" width="11" height="11" viewBox="0 0 24 24"
+                            [attr.fill]="s <= e.note_moyenne ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                            stroke-width="1.8">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </div>
+                    <span class="eu-card-avis-count">{{ e.total_commentaires }} avis</span>
+                </div>
+
+                <!-- Aperçu commentaires -->
+                <div class="eu-card-reviews-preview" *ngIf="getLatestComments(e.id, 1) as comments">
+                    <div class="eu-card-review-item" *ngFor="let c of comments">
+                        <div class="eu-card-review-head">
+                            <div class="eu-card-review-avatar">{{ getInitials(c.auteur_nom) }}</div>
+                            <div class="eu-card-review-info">
+                                <span class="eu-card-review-name">{{ c.auteur_nom }}</span>
+                                <div class="eu-card-review-stars">
+                                    <svg *ngFor="let s of starsArray" width="9" height="9" viewBox="0 0 24 24"
+                                        [attr.fill]="s <= c.note ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                                        stroke-width="1.8">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="eu-card-review-text">"{{ c.contenu | slice:0:60 }}{{ c.contenu.length > 60 ? '…' : ''
+                            }}"</p>
+                    </div>
+                    <button class="eu-card-see-all-reviews" (click)="openModalOnAvis(e, $event)">
+                        Voir tous les avis
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- État vide -->
+        <div class="eu-empty" *ngIf="filteredEtabs().length === 0">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c5c5d3" stroke-width="1.2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <p>Aucun établissement ne correspond à votre recherche.</p>
+            <button class="eu-reset-btn" (click)="searchQuery.set(''); filterType.set('')">
+                Réinitialiser les filtres
+            </button>
+        </div>
+    </div>
+</section>
+
+
+<!-- ── TÉMOIGNAGES ────────────────────────────────────────── -->
+<section class="eu-testi-section">
+    <div class="eu-section-label centered">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+        </svg>
+        Ce que disent les étudiants
+    </div>
+    <h2 class="eu-testi-title">Des milliers d'étudiants nous font confiance</h2>
+
+    <div class="eu-testi-track">
+        <div class="eu-testi-card" *ngFor="let t of testimonials; let i = index"
+            [class.active]="i === activeTestimonial">
+            <svg class="eu-quote-icon" width="28" height="28" viewBox="0 0 24 24" fill="rgba(200,168,75,.25)">
+                <path
+                    d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+                <path
+                    d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
+            </svg>
+            <p class="eu-testi-text">{{ t.texte }}</p>
+            <div class="eu-testi-author">
+                <div class="eu-testi-avatar">{{ t.initiales }}</div>
+                <div>
+                    <strong>{{ t.auteur }}</strong>
+                    <span>{{ t.role }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="eu-testi-dots">
+        <button *ngFor="let t of testimonials; let i = index" class="eu-testi-dot"
+            [class.active]="i === activeTestimonial" (click)="activeTestimonial = i" type="button">
+        </button>
+    </div>
+</section>
+
+
+<!-- ── FOOTER SIMPLE ──────────────────────────────────────── -->
+<footer class="eu-footer">
+    <div class="eu-footer-inner">
+        <div class="eu-brand">
+            <img src="design/campus237logo.jpeg" alt="" class="eu-brand-logo" />
+            <span class="eu-brand-name" style="color:#fff">CAMPUS<strong>237</strong></span>
+        </div>
+        <p class="eu-footer-copy">© 2025 Campus237 — Tous droits réservés</p>
+    </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL DÉTAIL ÉTABLISSEMENT
+══════════════════════════════════════════════════════════ -->
+<div class="eu-modal-overlay" *ngIf="selectedEtab()" (click)="closeModal()">
+    <div class="eu-modal" (click)="stopProp($event)" role="dialog" aria-modal="true">
+
+        <!-- Fermer -->
+        <button class="eu-modal-close" (click)="closeModal()" aria-label="Fermer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+
+        <!-- Hero image -->
+        <div class="eu-modal-hero" *ngIf="selectedEtab() as e">
+            <img [src]="getImage(e.type)" [alt]="e.nom" class="eu-modal-hero-img" />
+            <div class="eu-modal-hero-veil"></div>
+            <div class="eu-modal-hero-content">
+                <span class="eu-modal-type" [style.background]="getTypeAccent(e.type)">{{ getTypeLabel(e.type) }}</span>
+                <h2 class="eu-modal-title">{{ e.nom }}</h2>
+                <p class="eu-modal-loc">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)"
+                        stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {{ e.ville }}<ng-container *ngIf="e.region">, {{ e.region }}</ng-container>
+                </p>
+                <div class="eu-modal-rating-pill" *ngIf="modalRating() as r">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#C8A84B">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    {{ r.note_moyenne > 0 ? r.note_moyenne.toFixed(1) : '—' }}
+                    <span class="eu-modal-rating-total">({{ r.total_commentaires }} avis)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglets -->
+        <div class="eu-modal-tabs">
+            <button class="eu-modal-tab" [class.active]="activeTab() === 'info'" (click)="setTab('info')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                Informations
+            </button>
+            <button class="eu-modal-tab" [class.active]="activeTab() === 'avis'" (click)="setTab('avis')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                Avis &amp; Notes
+                <span class="eu-modal-tab-badge" *ngIf="modalRating() as r">{{ r.total_commentaires }}</span>
+            </button>
+        </div>
+
+        <!-- Contenu modal -->
+        <div class="eu-modal-body">
+
+            <!-- ── TAB INFO ── -->
+            <div *ngIf="activeTab() === 'info' && selectedEtab() as e" class="eu-modal-tab-content">
+                <div class="eu-info-grid">
+
+                    <div class="eu-info-block">
+                        <div class="eu-info-block-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B"
+                                stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                            Coordonnées
+                        </div>
+                        <ul class="eu-detail-list">
+                            <li *ngIf="e.adresse">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#adb5bd"
+                                    stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                {{ e.adresse }}
+                            </li>
+                            <li *ngIf="e.telephone">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#adb5bd"
+                                    stroke-width="2">
+                                    <path
+                                        d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z" />
+                                </svg>
+                                <a [href]="'tel:' + e.telephone" class="eu-link">{{ e.telephone }}</a>
+                            </li>
+                            <li *ngIf="e.email">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#adb5bd"
+                                    stroke-width="2">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                                <a [href]="'mailto:' + e.email" class="eu-link">{{ e.email }}</a>
+                            </li>
+                            <li *ngIf="e.site_web">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#adb5bd"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                                </svg>
+                                <a [href]="e.site_web" target="_blank" rel="noopener" class="eu-link">{{ e.site_web
+                                    }}</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="eu-info-block">
+                        <div class="eu-info-block-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B"
+                                stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="7" height="7" rx="1" />
+                            </svg>
+                            Caractéristiques
+                        </div>
+                        <div class="eu-chip-list">
+                            <div class="eu-chip" *ngIf="e.region">
+                                <span class="eu-chip-k">Région</span>
+                                <span class="eu-chip-v">{{ e.region }}</span>
+                            </div>
+                            <div class="eu-chip" *ngIf="e.pays">
+                                <span class="eu-chip-k">Pays</span>
+                                <span class="eu-chip-v">{{ e.pays }}</span>
+                            </div>
+                            <div class="eu-chip" *ngIf="e.annee_creation">
+                                <span class="eu-chip-k">Fondé en</span>
+                                <span class="eu-chip-v">{{ e.annee_creation }}</span>
+                            </div>
+                            <div class="eu-chip" *ngIf="e.capacite">
+                                <span class="eu-chip-k">Capacité</span>
+                                <span class="eu-chip-v">{{ e.capacite }} élèves</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="eu-info-block eu-info-full"
+                        *ngIf="e.niveaux_scolaires && e.niveaux_scolaires.length > 0">
+                        <div class="eu-info-block-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B"
+                                stroke-width="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" />
+                                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                            </svg>
+                            Niveaux d'enseignement
+                        </div>
+                        <div class="eu-niveau-tags">
+                            <span class="eu-niveau-tag" *ngFor="let n of e.niveaux_scolaires">{{ n }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TAB AVIS ── -->
+            <div *ngIf="activeTab() === 'avis'" class="eu-modal-tab-content">
+
+                <!-- Résumé note -->
+                <div class="eu-rating-summary" *ngIf="modalRating() as r">
+                    <span class="eu-rating-big-num">{{ r.note_moyenne > 0 ? r.note_moyenne.toFixed(1) : '—' }}</span>
+                    <div class="eu-rating-stars-lg">
+                        <svg *ngFor="let s of starsArray" width="18" height="18" viewBox="0 0 24 24"
+                            [attr.fill]="s <= r.note_moyenne ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                            stroke-width="1.8">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </div>
+                    <span class="eu-rating-total-lbl">{{ r.total_commentaires }} avis publiés</span>
+                </div>
+
+                <!-- Formulaire -->
+                <div class="eu-comment-form" *ngIf="!hasAlreadyCommented(); else deja">
+                    <div class="eu-form-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F2D6B" stroke-width="2">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                        </svg>
+                        Laisser un avis
+                    </div>
+
+                    <!-- Étoiles -->
+                    <div class="eu-star-row">
+                        <span class="eu-star-label">Votre note :</span>
+                        <div class="eu-stars-pick">
+                            <button *ngFor="let s of starsArray" type="button" class="eu-star-pick-btn"
+                                (click)="setNote(s)" (mouseenter)="hoverStar(s)" (mouseleave)="clearHover()">
+                                <svg width="28" height="28" viewBox="0 0 24 24"
+                                    [attr.fill]="displayNote(s) ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                                    stroke-width="1.8">
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="eu-star-label-val" *ngIf="hoverNote || commentNote">
+                            {{ noteLabel(hoverNote || commentNote) }}
+                        </span>
+                    </div>
+
+                    <!-- Texte -->
+                    <textarea class="eu-textarea" [(ngModel)]="commentText" rows="4" maxlength="1000"
+                        placeholder="Partagez votre expérience avec cet établissement…"></textarea>
+                    <div class="eu-textarea-footer">
+                        <span class="eu-char-count">{{ commentText.length }}/1000</span>
+                    </div>
+
+                    <!-- Feedback -->
+                    <div class="eu-feedback error" *ngIf="submitError()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        {{ submitError() }}
+                    </div>
+                    <div class="eu-feedback success" *ngIf="submitSuccess()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Votre avis a été soumis. Il sera visible après modération.
+                    </div>
+
+                    <button class="eu-submit-btn" type="button" (click)="submitComment()"
+                        [disabled]="submitLoading() || commentNote < 1 || !commentText.trim()">
+                        <span *ngIf="!submitLoading()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            Publier mon avis
+                        </span>
+                        <span class="eu-spinner" *ngIf="submitLoading()"></span>
+                    </button>
+                </div>
+
+                <!-- Déjà commenté -->
+                <ng-template #deja>
+                    <div class="eu-already-notice">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Vous avez déjà laissé un avis pour cet établissement.
+                    </div>
+                </ng-template>
+
+                <!-- Liste commentaires -->
+                <div class="eu-comments-list">
+                    <div class="eu-comments-list-title">
+                        Avis approuvés
+                        <span class="eu-comments-badge">{{ approvedComments().length }}</span>
+                    </div>
+
+                    <!-- Skeleton -->
+                    <div *ngIf="loadingComments()">
+                        <div class="eu-comment-skel" *ngFor="let i of [1,2,3]"></div>
+                    </div>
+
+                    <ng-container *ngIf="!loadingComments()">
+                        <div class="eu-comment-item" *ngFor="let c of approvedComments()">
+                            <div class="eu-comment-head">
+                                <div class="eu-comment-avatar">{{ getInitials(c.auteur_nom) }}</div>
+                                <div class="eu-comment-meta-wrap">
+                                    <span class="eu-comment-author">{{ c.auteur_nom }}</span>
+                                    <span class="eu-comment-date">{{ formatDate(c.date_publication) }}</span>
+                                </div>
+                                <div class="eu-comment-note-stars">
+                                    <svg *ngFor="let s of starsArray" width="11" height="11" viewBox="0 0 24 24"
+                                        [attr.fill]="s <= c.note ? '#C8A84B' : 'none'" [attr.stroke]="'#C8A84B'"
+                                        stroke-width="1.8">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="eu-comment-text">{{ c.contenu }}</p>
+                        </div>
+
+                        <div class="eu-no-comments" *ngIf="approvedComments().length === 0">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d5db"
+                                stroke-width="1.2">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                            </svg>
+                            <p>Aucun avis publié pour l'instant.<br>Soyez le premier à partager votre expérience !</p>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
